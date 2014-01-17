@@ -45,4 +45,6 @@ def convert_and_trim(afile, fs, trim):
     tmp.close()
     psox = Popen(['ffmpeg', '-loglevel', 'quiet', '-i', afile, '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim), '-acodec', 'pcm_s16le', tmp_name])
     psox.wait()
+    if not psox.returncode == 0:
+        raise Exception("FFMpeg failed")
     return tmp_name
