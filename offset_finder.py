@@ -9,8 +9,8 @@ import numpy as np
 def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
-    a1 = wavfile.read(tmp1)[1] / (2.0 ** 15)
-    a2 = wavfile.read(tmp2)[1] / (2.0 ** 15)
+    a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0 ** 15)
+    a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
     os.remove(tmp1)
     os.remove(tmp2)
     mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
@@ -39,6 +39,6 @@ def convert_and_trim(afile, fs, trim):
     tmp = tempfile.NamedTemporaryFile(mode='r+b', prefix='offset_', suffix='.wav')
     tmp_name = tmp.name
     tmp.close()
-    psox = Popen(['sox', afile, '-c', '1', '-r', str(fs), '-b', '16', tmp_name, 'trim', '0', str(trim)])
+    psox = Popen(['ffmpeg', '-loglevel', 'quiet', '-i', afile, '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim), '-acodec', 'pcm_s16le', tmp_name])
     psox.wait()
     return tmp_name
