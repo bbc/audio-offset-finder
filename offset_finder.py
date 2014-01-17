@@ -6,7 +6,7 @@ from scikits.talkbox.features.mfcc import mfcc
 import os, tempfile
 import numpy as np
 
-def find_offset(file1, file2, fs=16000, trim=60*15, correl_nframes=1000):
+def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     a1 = wavfile.read(tmp1)[1] / (2.0 ** 15)
