@@ -11,7 +11,7 @@ def main():
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
     offset = find_offset(args.within, args.find_offset_of)
-    print "Offset: %s" % str(offset)
+    print "Offset: %s (seconds)" % str(offset)
 
 if __name__ == '__main__':
     main()
