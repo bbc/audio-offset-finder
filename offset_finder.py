@@ -13,8 +13,8 @@ def find_offset(file1, file2, fs=16000, trim=60*15, correl_nframes=1000):
     a2 = wavfile.read(tmp2)[1] / (2.0 ** 15)
     os.remove(tmp1)
     os.remove(tmp2)
-    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=16000, nceps=13)[0]
-    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=16000, nceps=13)[0]
+    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
+    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = max_k_index * 160.0 / float(fs) # * over / sample rate
