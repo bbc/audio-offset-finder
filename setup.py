@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='offset-finder',
-    version='0.0.1',
+    version='0.0.2',
     description='Find offset of audio file within another audio file',
     author='Yves Raimond',
     author_email='yves.raimond@bbc.co.uk',
