@@ -14,10 +14,15 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     # https://trac.ffmpeg.org/ticket/1843
     warnings.simplefilter("ignore", wavfile.WavFileWarning)
     a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0 ** 15)
+    first_non_zero1 = np.where(a1 > 0)[0][0]
     a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
+    first_non_zero2 = np.where(a2 > 0)[0][0]
+    truncate = max(first_non_zero1, first_non_zero2)
+    a1 = a1[truncate:]
+    a2 = a2[truncate:]
     # First frame appears to be corrupted when coming out of ffmpeg
-    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0][1:]
-    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0][1:]
+    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
+    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = max_k_index * 160.0 / float(fs) # * over / sample rate
