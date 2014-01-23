@@ -15,13 +15,14 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     warnings.simplefilter("ignore", wavfile.WavFileWarning)
     a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0 ** 15)
     a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
-    os.remove(tmp1)
-    os.remove(tmp2)
-    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
-    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
+    # First frame appears to be corrupted when coming out of ffmpeg
+    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0][1:]
+    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0][1:]
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = max_k_index * 160.0 / float(fs) # * over / sample rate
+    os.remove(tmp1)
+    os.remove(tmp2)
     return offset
 
 def cross_correlation(mfcc1, mfcc2, nframes):
