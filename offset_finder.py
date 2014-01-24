@@ -14,13 +14,10 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     # https://trac.ffmpeg.org/ticket/1843
     warnings.simplefilter("ignore", wavfile.WavFileWarning)
     a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0 ** 15)
-    first_non_zero1 = np.where(a1 > 0)[0][0]
     a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
-    first_non_zero2 = np.where(a2 > 0)[0][0]
-    truncate = max(first_non_zero1, first_non_zero2)
-    a1 = a1[truncate:]
-    a2 = a2[truncate:]
-    # First frame appears to be corrupted when coming out of ffmpeg
+    # We truncate zeroes off the beginning of each signals
+    # (only seems to happen in ffmpeg, not in sox)
+    a1, a2 = truncate(a1, a2)
     mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
@@ -29,6 +26,12 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     os.remove(tmp1)
     os.remove(tmp2)
     return offset
+
+def truncate(signal1, signal2):
+    first_non_zero1 = np.where(signal1 > 0)[0][0]
+    first_non_zero2 = np.where(signal2 > 0)[0][0]
+    truncate = max(first_non_zero1, first_non_zero2)
+    return (signal1[truncate:], signal2[truncate:])
 
 def cross_correlation(mfcc1, mfcc2, nframes):
     mfcc1 = std_mfcc(mfcc1)
