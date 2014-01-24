@@ -28,10 +28,19 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     return offset
 
 def truncate(signal1, signal2):
-    first_non_zero1 = np.where(signal1 > 0)[0][0]
-    first_non_zero2 = np.where(signal2 > 0)[0][0]
-    truncate = max(first_non_zero1, first_non_zero2)
-    return (signal1[truncate:], signal2[truncate:])
+    non_zeros1 = np.where(signal1 > 0)[0]
+    non_zeros2 = np.where(signal2 > 0)[0]
+    if (len(non_zeros1) == 0 and len(non_zeros2) == 0):
+        return (signal1, signal2)
+    elif len(non_zeros1) == 0:
+        trunc = non_zeros2[0] 
+    elif len(non_zeros2) == 0:
+        trunc = non_zeros1[0]
+    else:
+        first_non_zero1 = non_zeros1[0]
+        first_non_zero2 = non_zeros2[0]
+        trunc = max(first_non_zero1, first_non_zero2)
+    return (signal1[trunc:], signal2[trunc:])
 
 def cross_correlation(mfcc1, mfcc2, nframes):
     mfcc1 = std_mfcc(mfcc1)
