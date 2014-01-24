@@ -22,6 +22,11 @@ Usage
     $ offset-finder --find-offset-of file1.wav --within file2.wav
     Offset: 300 (seconds)
 
+Testing
+-------
+
+    $ nosetests
+
 Licensing terms and authorship
 ------------------------------
 
