@@ -24,7 +24,7 @@ setup(
     description='Find offset of audio file within another audio file',
     author='Yves Raimond',
     author_email='yves.raimond@bbc.co.uk',
-    packages=['.'],
+    packages=['offset_finder'],
     install_requires=[
         'scipy',
         'numpy',
