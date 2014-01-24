@@ -38,6 +38,7 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     mfcc2 = std_mfcc(mfcc2)
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
+    # The MFCC window overlap is hardcoded in scikits.talkbox
     offset = max_k_index * 160.0 / float(fs) # * over / sample rate
     os.remove(tmp1)
     os.remove(tmp2)
@@ -63,8 +64,8 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     n2, mdim2 = mfcc2.shape
     n = n1 - nframes + 1
     c = np.zeros(n)
-    for k in range(0, n):
-        cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[0:nframes]), axis=0)
+    for k in range(n):
+        cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[:nframes]), axis=0)
         c[k] = np.linalg.norm(cc)
     return c
 
