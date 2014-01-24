@@ -20,6 +20,8 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     a1, a2 = truncate(a1, a2)
     mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
+    mfcc1 = std_mfcc(mfcc1)
+    mfcc2 = std_mfcc(mfcc2)
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = max_k_index * 160.0 / float(fs) # * over / sample rate
@@ -43,11 +45,9 @@ def truncate(signal1, signal2):
     return (signal1[trunc:], signal2[trunc:])
 
 def cross_correlation(mfcc1, mfcc2, nframes):
-    mfcc1 = std_mfcc(mfcc1)
-    mfcc2 = std_mfcc(mfcc2)
     n1, mdim1 = mfcc1.shape
     n2, mdim2 = mfcc2.shape
-    n = min(n1, n2) - nframes
+    n = n1 - nframes + 1
     c = np.zeros(n)
     for k in range(0, n):
         cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[0:nframes]), axis=0)
