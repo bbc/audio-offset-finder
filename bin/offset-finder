@@ -4,13 +4,18 @@ from offset_finder import find_offset
 import argparse, sys
 
 def main():
-    parser = argparse.ArgumentParser(description="Find the offset of an audio file within another one")
+    parser = argparse.ArgumentParser(
+        description="Find the offset of an audio file within another one", 
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument('--find-offset-of', metavar='audio file', type=str, help='Find the offset of file')
     parser.add_argument('--within', metavar='audio file', type=str, help='Within file')
+    parser.add_argument('--sr', metavar='sample rate', type=int, default=8000, help='Target sample rate during downsampling')
+    parser.add_argument('--trim', metavar='seconds', type=int, default=60*15, help='Only uses first n seconds of audio files')
     args = parser.parse_args()
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
-    offset = find_offset(args.within, args.find_offset_of)
+    offset = find_offset(args.within, args.find_offset_of, args.sr, args.trim)
     print "Offset: %s (seconds)" % str(offset)
 
 if __name__ == '__main__':
