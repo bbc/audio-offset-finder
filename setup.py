@@ -26,7 +26,7 @@ setup(
     author_email='yves.raimond@bbc.co.uk',
     packages=['offset_finder'],
     install_requires=[
-        'scipy',
+        'scipy>=0.12.0',
         'numpy',
         'scikits.talkbox', 
     ],
