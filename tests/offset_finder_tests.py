@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from nose.tools import *
-from offset_finder import *
+from audio_offset_finder import *
 from numpy.testing import *
 import numpy as np
 
