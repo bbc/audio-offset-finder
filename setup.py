@@ -19,7 +19,7 @@
 from setuptools import setup
 
 setup(
-    name='offset-finder',
+    name='audio-offset-finder',
     version='0.1.0',
     description='Find offset of audio file within another audio file',
     author='Yves Raimond',
@@ -30,6 +30,6 @@ setup(
         'numpy',
         'scikits.talkbox', 
     ],
-    scripts=['bin/offset-finder'],
+    scripts=['bin/audio-offset-finder'],
 )
 
