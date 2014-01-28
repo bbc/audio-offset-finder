@@ -1,5 +1,5 @@
-offset-finder
-=============
+audio-offset-finder
+===================
 
 A simple tool for finding the offset of an audio file within another
 file. 
