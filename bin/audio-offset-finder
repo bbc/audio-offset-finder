@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from offset_finder import find_offset
+from audio_offset_finder import find_offset
 import argparse, sys
 
 def main():

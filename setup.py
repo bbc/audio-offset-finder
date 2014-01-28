@@ -26,7 +26,7 @@ setup(
     author_email='yves.raimond@bbc.co.uk',
     url='https://github.com/bbcrd/audio-offset-finder',
     license='Apache License 2.0',
-    packages=['offset_finder'],
+    packages=['audio_offset_finder'],
     install_requires=[
         'scipy>=0.12.0',
         'numpy',
