@@ -24,6 +24,8 @@ setup(
     description='Find offset of audio file within another audio file',
     author='Yves Raimond',
     author_email='yves.raimond@bbc.co.uk',
+    url='https://github.com/bbcrd/audio-offset-finder',
+    license='Apache License 2.0',
     packages=['offset_finder'],
     install_requires=[
         'scipy>=0.12.0',
