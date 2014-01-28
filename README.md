@@ -13,13 +13,13 @@ supported by ffmpeg.
 Installation
 ------------
 
-    $ pip install offset-finder
+    $ pip install audio-offset-finder
 
 Usage
 -----
 
-    $ offset-finder --help
-    $ offset-finder --find-offset-of file1.wav --within file2.wav
+    $ audio-offset-finder --help
+    $ audio-offset-finder --find-offset-of file1.wav --within file2.wav
     Offset: 300 (seconds)
 
 Testing
