@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from subprocess import Popen
+from subprocess import Popen, PIPE
 from scipy.io import wavfile
 from scikits.talkbox.features.mfcc import mfcc
 import os, tempfile, warnings
@@ -40,9 +40,10 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     max_k_index = np.argmax(c)
     # The MFCC window overlap is hardcoded in scikits.talkbox
     offset = max_k_index * 160.0 / float(fs) # * over / sample rate
+    score = (c[max_k_index] - np.mean(c)) / np.std(c) # standard score of peak
     os.remove(tmp1)
     os.remove(tmp2)
-    return offset
+    return offset, score
 
 def truncate(signal1, signal2):
     non_zeros1 = np.where(signal1 > 0)[0]
@@ -70,14 +71,18 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     return c
 
 def std_mfcc(mfcc):
-    return (mfcc - np.mean(mfcc, axis=0)) / (np.max(mfcc,axis=0) - np.min(mfcc,axis=0))
+    return (mfcc - np.mean(mfcc, axis=0)) / np.std(mfcc, axis=0)
 
 def convert_and_trim(afile, fs, trim):
     tmp = tempfile.NamedTemporaryFile(mode='r+b', prefix='offset_', suffix='.wav')
     tmp_name = tmp.name
     tmp.close()
-    psox = Popen(['ffmpeg', '-loglevel', 'quiet', '-i', afile, '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim), '-acodec', 'pcm_s16le', tmp_name])
-    psox.wait()
+    psox = Popen([
+        'ffmpeg', '-loglevel', 'panic', '-i', afile, 
+        '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim), 
+        '-acodec', 'pcm_s16le', tmp_name
+    ], stderr=PIPE)
+    psox.communicate()
     if not psox.returncode == 0:
         raise Exception("FFMpeg failed")
     return tmp_name

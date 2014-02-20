@@ -31,8 +31,9 @@ def main():
     args = parser.parse_args()
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
-    offset = find_offset(args.within, args.find_offset_of, args.sr, args.trim)
+    offset, score = find_offset(args.within, args.find_offset_of, args.sr, args.trim)
     print "Offset: %s (seconds)" % str(offset)
+    print "Standard score: %s" % str(score)
 
 if __name__ == '__main__':
     main()

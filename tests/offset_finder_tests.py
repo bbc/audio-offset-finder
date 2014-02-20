@@ -18,6 +18,23 @@ from nose.tools import *
 from audio_offset_finder import *
 from numpy.testing import *
 import numpy as np
+import os
+
+def path(test_file):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'audio', test_file))
+
+def test_find_offset():
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), trim=35) 
+    assert_almost_equal(offset, 12.28)
+    assert(score > 10)
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), trim=35) 
+    assert_almost_equal(offset, 0.0)
+    assert(score > 10)
+    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_2.mp3'), trim=35) 
+    assert_almost_equal(offset, 0.0)
+    assert(score > 10)
+    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), trim=35) 
+    assert(score < 10) # No good offset found
 
 def test_truncate():
     a1 = np.array([])
@@ -46,7 +63,10 @@ def test_truncate():
 
 def test_std_mfcc():
     m = np.array([[2,3,4], [4,5,5]])
-    assert_array_equal(std_mfcc(m), np.array([[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]]))
+    s1 = np.std([2,4])
+    s2 = np.std([3,5])
+    s3 = np.std([4,5])
+    assert_array_equal(std_mfcc(m), np.array([[-1.0/s1, -1.0/s2, -0.5/s3], [1.0/s1, 1.0/s2, 0.5/s3]]))
 
 def test_cross_correlation():
     m1 = np.array([[-0.5, -0.4, -0.4], [0.5, 0.5, 0.4], [0.1, -0.1, 0.1]])
