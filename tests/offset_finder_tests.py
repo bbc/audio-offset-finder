@@ -1,4 +1,4 @@
-# offset-finder
+# audio-offset-finder
 #
 # Copyright (c) 2014 British Broadcasting Corporation
 #
