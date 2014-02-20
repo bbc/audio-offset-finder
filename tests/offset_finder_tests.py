@@ -24,8 +24,14 @@ def path(test_file):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), 'audio', test_file))
 
 def test_find_offset():
+    # timbl_1.mp3: Full file
+    # timbl_2.mp3: File truncated at 12.28 seconds
+    # timbl_3.mp3: File truncated at 12.28 seconds with white noise added to it
     offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), trim=35) 
     assert_almost_equal(offset, 12.28)
+    assert(score > 10)
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_3.mp3'), trim=35)
+    assert_almost_equal(offset, 12.26)
     assert(score > 10)
     offset, score = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), trim=35) 
     assert_almost_equal(offset, 0.0)
