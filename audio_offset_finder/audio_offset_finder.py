@@ -31,7 +31,8 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
     # We truncate zeroes off the beginning of each signals
     # (only seems to happen in ffmpeg, not in sox)
-    a1, a2 = truncate(a1, a2)
+    a1 = ensure_non_zero(a1)
+    a2 = ensure_non_zero(a2)
     mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
     mfcc1 = std_mfcc(mfcc1)
@@ -45,20 +46,12 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     os.remove(tmp2)
     return offset, score
 
-def truncate(signal1, signal2):
-    non_zeros1 = np.where(signal1 > 0)[0]
-    non_zeros2 = np.where(signal2 > 0)[0]
-    if (len(non_zeros1) == 0 and len(non_zeros2) == 0):
-        return (signal1, signal2)
-    elif len(non_zeros1) == 0:
-        trunc = non_zeros2[0] 
-    elif len(non_zeros2) == 0:
-        trunc = non_zeros1[0]
-    else:
-        first_non_zero1 = non_zeros1[0]
-        first_non_zero2 = non_zeros2[0]
-        trunc = max(first_non_zero1, first_non_zero2)
-    return (signal1[trunc:], signal2[trunc:])
+def ensure_non_zero(signal):
+    # We add a little bit of static to avoid
+    # 'divide by zero encountered in log'
+    # during MFCC computation
+    signal += np.random.random(len(signal)) * 10**-10
+    return signal
 
 def cross_correlation(mfcc1, mfcc2, nframes):
     n1, mdim1 = mfcc1.shape
