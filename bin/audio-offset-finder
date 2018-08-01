@@ -16,8 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+sys.path.append('../audio_offset_finder/')
+
 from audio_offset_finder import find_offset
-import argparse, sys
+import argparse, sys, json
+import xml.etree.cElementTree as ET
 
 def main():
     parser = argparse.ArgumentParser(
@@ -28,12 +32,19 @@ def main():
     parser.add_argument('--within', metavar='audio file', type=str, help='Within file')
     parser.add_argument('--sr', metavar='sample rate', type=int, default=8000, help='Target sample rate during downsampling')
     parser.add_argument('--trim', metavar='seconds', type=int, default=60*15, help='Only uses first n seconds of audio files')
+    parser.add_argument('--output', metavar='output_type', type=str, default='text', help='Output format in \'text\' or \'json\'')
     args = parser.parse_args()
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
-    offset, score = find_offset(args.within, args.find_offset_of, args.sr, args.trim)
-    print "Offset: %s (seconds)" % str(offset)
-    print "Standard score: %s" % str(score)
+    offset, score = find_offset(args.within, args.find_offset_of, args.sr, args.trim, args.output)
+    if (args.output == 'json'):
+        print output_json(offset, score, args.sr)
+    elif (args.output == 'text'):
+        print "Offset: %s (seconds)" % str(offset/args.sr)
+        print "Standard score: %s" % str(score)
+
+def output_json(offset, score, sr):
+    return json.dumps({"seconds": offset/sr, "samples": int(offset), "score": score}, sort_keys=True, indent=4)
 
 if __name__ == '__main__':
     main()

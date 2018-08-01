@@ -20,7 +20,7 @@ from scikits.talkbox.features.mfcc import mfcc
 import os, tempfile, warnings
 import numpy as np
 
-def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
+def find_offset(file1, file2, fs=8000, trim=60*15, output='seconds', correl_nframes=1000):
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     # Removing warnings because of 18 bits block size
@@ -40,7 +40,7 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     # The MFCC window overlap is hardcoded in scikits.talkbox
-    offset = max_k_index * 160.0 / float(fs) # * over / sample rate
+    offset = max_k_index * 160.0
     score = (c[max_k_index] - np.mean(c)) / np.std(c) # standard score of peak
     os.remove(tmp1)
     os.remove(tmp2)
