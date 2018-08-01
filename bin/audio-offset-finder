@@ -16,12 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-sys.path.append('../audio_offset_finder/')
-
 from audio_offset_finder import find_offset
 import argparse, sys, json
-import xml.etree.cElementTree as ET
 
 def main():
     parser = argparse.ArgumentParser(
