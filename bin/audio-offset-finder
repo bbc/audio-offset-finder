@@ -37,6 +37,7 @@ def main():
         print output_json(offset, score, args.sr)
     elif (args.output == 'text'):
         print "Offset: %s (seconds)" % str(offset/args.sr)
+        print "Offset: %s (samples)" % int(str(offset))
         print "Standard score: %s" % str(score)
 
 def output_json(offset, score, sr):
