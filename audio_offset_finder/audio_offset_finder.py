@@ -20,7 +20,7 @@ from scikits.talkbox.features.mfcc import mfcc
 import os, tempfile, warnings
 import numpy as np
 
-def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
+def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=700):
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     # Removing warnings because of 18 bits block size
