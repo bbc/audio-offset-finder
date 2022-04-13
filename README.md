@@ -13,6 +13,12 @@ supported by ffmpeg.
 Installation
 ------------
 
+To install from this source directory:
+
+    $ pip install .
+
+Or, to install the latest package from PyPi.org:
+
     $ pip install audio-offset-finder
 
 Usage
