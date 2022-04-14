@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # audio-offset-finder
 #
@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from audio_offset_finder import find_offset
+from audio_offset_finder.audio_offset_finder import find_offset
 import argparse, sys
 
 def main():
@@ -31,9 +31,9 @@ def main():
     args = parser.parse_args()
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
-    offset, score = find_offset(args.within, args.find_offset_of, args.sr, args.trim)
-    print "Offset: %s (seconds)" % str(offset)
-    print "Standard score: %s" % str(score)
+    offset, score = find_offset(args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim))
+    print("Offset: %s (seconds)" % str(offset))
+    print("Standard score: %s" % str(score))
 
 if __name__ == '__main__':
     main()
