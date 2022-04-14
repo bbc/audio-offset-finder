@@ -5,7 +5,7 @@ A simple tool for finding the offset of an audio file within another
 file. 
 
 Uses cross-correlation of standardised Mel-Frequency Cepstral Coefficients,
-so should be relatively robust to noise (encoding, compression, etc).
+so should be relatively robust to noise (encoding, compression, etc).  The accuracy is typically to within about 0.01s.
 
 It uses ffmpeg for transcoding, so should work on all file formats
 supported by ffmpeg.
