@@ -13,7 +13,7 @@ supported by ffmpeg.
 Installation
 ------------
 
-To install from this source directory:
+To install from this source directory once downloaded:
 
     $ pip install .
 
