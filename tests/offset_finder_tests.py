@@ -1,6 +1,6 @@
 # audio-offset-finder
 #
-# Copyright (c) 2014 British Broadcasting Corporation
+# Copyright (c) 2014-22 British Broadcasting Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from nose.tools import *
-from audio_offset_finder import *
+from audio_offset_finder.audio_offset_finder import *
 from numpy.testing import *
 import numpy as np
 import os
@@ -25,21 +25,21 @@ def path(test_file):
 
 def test_find_offset():
     # timbl_1.mp3: Full file
-    # timbl_2.mp3: File truncated at 12.28 seconds
-    # timbl_3.mp3: File truncated at 12.28 seconds with white noise added to it
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), trim=35) 
-    assert_almost_equal(offset, 12.28)
-    assert(score > 10)
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_3.mp3'), trim=35)
+    # timbl_2.mp3: File truncated at 12.265 seconds
+    # timbl_3.mp3: File truncated at 12.265 seconds with white noise added to it
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
     assert_almost_equal(offset, 12.26)
     assert(score > 10)
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), trim=35) 
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_3.mp3'), hop_length=160, trim=35)
+    assert_almost_equal(offset, 12.24)
+    assert(score > 10)
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
     assert_almost_equal(offset, 0.0)
     assert(score > 10)
-    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_2.mp3'), trim=35) 
+    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
     assert_almost_equal(offset, 0.0)
     assert(score > 10)
-    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), trim=35) 
+    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
     assert(score < 10) # No good offset found
 
 def test_ensure_non_zero():
