@@ -1,6 +1,6 @@
 # audio-offset-finder
 #
-# Copyright (c) 2014 British Broadcasting Corporation
+# Copyright (c) 2014-22 British Broadcasting Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 from subprocess import Popen, PIPE
 from scipy.io import wavfile
-from scikits.talkbox.features.mfcc import mfcc
+import librosa
 import os, tempfile, warnings
 import numpy as np
 
-def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
+def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
+    return [np.transpose(librosa.feature.mfcc(y=audio, sr=fs, n_fft=nfft, win_length=win_length, hop_length=hop_length, n_mfcc=numcep))]
+
+def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, correl_nframes=1000):
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     # Removing warnings because of 18 bits block size
@@ -33,14 +36,14 @@ def find_offset(file1, file2, fs=8000, trim=60*15, correl_nframes=1000):
     # (only seems to happen in ffmpeg, not in sox)
     a1 = ensure_non_zero(a1)
     a2 = ensure_non_zero(a2)
-    mfcc1 = mfcc(a1, nwin=256, nfft=512, fs=fs, nceps=13)[0]
-    mfcc2 = mfcc(a2, nwin=256, nfft=512, fs=fs, nceps=13)[0]
+    mfcc1 = mfcc(a1, win_length=win_length, nfft=512, fs=fs, hop_length=hop_length, numcep=26)[0]
+    mfcc2 = mfcc(a2, win_length=win_length, nfft=512, fs=fs, hop_length=hop_length, numcep=26)[0]
     mfcc1 = std_mfcc(mfcc1)
     mfcc2 = std_mfcc(mfcc2)
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
-    # The MFCC window overlap is hardcoded in scikits.talkbox
-    offset = max_k_index * 160.0 / float(fs) # * over / sample rate
+    offset = (max_k_index) * hop_length / fs
+    
     score = (c[max_k_index] - np.mean(c)) / np.std(c) # standard score of peak
     os.remove(tmp1)
     os.remove(tmp2)
