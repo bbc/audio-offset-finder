@@ -41,6 +41,10 @@ def test_find_offset():
     assert(score > 10)
     offset, score = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
     assert(score < 10) # No good offset found
+    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=1) 
+    assert(score < 10) # No good offset found
+    with assert_raises(InsufficientAudioException):
+        offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=0.1)
 
 def test_ensure_non_zero():
     signal = np.zeros(100)

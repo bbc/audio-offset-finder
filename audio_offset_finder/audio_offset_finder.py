@@ -20,10 +20,15 @@ import librosa
 import os, tempfile, warnings
 import numpy as np
 
+class InsufficientAudioException(Exception):
+    pass
+
 def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     return [np.transpose(librosa.feature.mfcc(y=audio, sr=fs, n_fft=nfft, win_length=win_length, hop_length=hop_length, n_mfcc=numcep))]
 
 def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, correl_nframes=1000):
+    nfft=512 #samples to use in FFT when calculating MFCCs
+
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     # Removing warnings because of 18 bits block size
@@ -36,10 +41,17 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     # (only seems to happen in ffmpeg, not in sox)
     a1 = ensure_non_zero(a1)
     a2 = ensure_non_zero(a2)
-    mfcc1 = mfcc(a1, win_length=win_length, nfft=512, fs=fs, hop_length=hop_length, numcep=26)[0]
-    mfcc2 = mfcc(a2, win_length=win_length, nfft=512, fs=fs, hop_length=hop_length, numcep=26)[0]
+
+    mfcc1 = mfcc(a1, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
+    mfcc2 = mfcc(a2, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
     mfcc1 = std_mfcc(mfcc1)
     mfcc2 = std_mfcc(mfcc2)
+
+    #Adjust correl_nframes to match the length of audio supplied, to avoid buffer overruns
+    correl_nframes = min(correl_nframes, len(mfcc1) - 1, len(mfcc2) - 1)
+    if correl_nframes < 10:
+        raise InsufficientAudioException("Not enough audio to analyse - try longer clips or do less trimming.")
+
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = (max_k_index) * hop_length / fs
