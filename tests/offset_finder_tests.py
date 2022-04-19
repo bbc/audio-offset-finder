@@ -26,7 +26,7 @@ def path(test_file):
 def test_find_offset():
     # timbl_1.mp3: Full file
     # timbl_2.mp3: File truncated at 12.265 seconds
-    # timbl_3.mp3: File truncated at 12.265 seconds with white noise added to it
+    # timbl_3.mp3: File truncated at 12.242 seconds with white noise added to it
     offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
     assert_almost_equal(offset, 12.26)
     assert(score > 10)
