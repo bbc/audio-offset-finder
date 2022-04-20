@@ -19,6 +19,7 @@ from scipy.io import wavfile
 import librosa
 import os, tempfile, warnings, logging
 import numpy as np
+import matplotlib.pyplot as pyplot
 
 class InsufficientAudioException(Exception):
     pass
@@ -26,7 +27,7 @@ class InsufficientAudioException(Exception):
 def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     return [np.transpose(librosa.feature.mfcc(y=audio, sr=fs, n_fft=nfft, win_length=win_length, hop_length=hop_length, n_mfcc=numcep))]
 
-def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, correl_nframes=None):
+def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, correl_nframes=None, plot=False):
     nfft=512 #samples to use in FFT when calculating MFCCs
 
     tmp1 = convert_and_trim(file1, fs, trim)
@@ -59,6 +60,11 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes_actual)
     max_k_index = np.argmax(c)
     offset = (max_k_index) * hop_length / fs
+    
+    if plot:
+        pyplot.figure(figsize=(15, 5))
+        pyplot.plot(c)
+        pyplot.show()
     
     score = (c[max_k_index] - np.mean(c)) / np.std(c) # standard score of peak
     os.remove(tmp1)
