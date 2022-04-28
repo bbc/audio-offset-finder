@@ -1,14 +1,14 @@
 audio-offset-finder
 ===================
 
-A simple tool for finding the offset of an audio file within another
-file. 
+A simple tool and library for finding the offset of an audio file within another file.
 
 Uses cross-correlation of standardised Mel-Frequency Cepstral Coefficients,
 so should be relatively robust to noise (encoding, compression, etc).  The accuracy is typically to within about 0.01s.
 
-It uses ffmpeg for transcoding, so should work on all file formats
-supported by ffmpeg.
+The tool outputs the calculated offset in seconds, and a "standard score" representing the prominence of the chosen correlation peak.  This can be used as an estimate of the accuracy of the calculated offset - one with a score greater than ten is likely to be correct (at least for audio without similar repeated sections) within the accuracy of the tool; an offset with a score less than five is unlikely to be correct, and a manual check should be carried out.
+
+The tool uses ffmpeg for transcoding, so should work on all file formats supported by ffmpeg.
 
 Installation
 ------------
@@ -26,7 +26,8 @@ Usage
 
     $ audio-offset-finder --help
     $ audio-offset-finder --find-offset-of file1.wav --within file2.wav
-    Offset: 300 (seconds)
+    Offset: 12.26 (seconds)
+    Standard score: 21.102
 
 Testing
 -------
