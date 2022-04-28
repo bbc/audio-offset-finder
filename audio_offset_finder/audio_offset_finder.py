@@ -47,7 +47,7 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     mfcc2 = std_mfcc(mfcc2)
 
     #Derive correl_nframes from the length of audio supplied, to avoid buffer overruns
-    correl_nframes = min(int(len(mfcc1)/3), len(mfcc2))
+    correl_nframes = min(int(len(mfcc1)/3), len(mfcc2), 2000)
     if correl_nframes < 10:
         raise InsufficientAudioException("Not enough audio to analyse - try longer clips, less trimming, or higher resolution.")
 
