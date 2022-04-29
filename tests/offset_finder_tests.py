@@ -27,24 +27,24 @@ def test_find_offset():
     # timbl_1.mp3: Full file
     # timbl_2.mp3: File truncated at 12.254 seconds
     # timbl_3.mp3: File truncated at 12.223 seconds with white noise added to it
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
-    assert_almost_equal(offset, 12.26)
-    assert(score > 10)
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_3.mp3'), hop_length=160, trim=35)
-    assert_almost_equal(offset, 12.24)
-    assert(score > 10)
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
-    assert_almost_equal(offset, 0.0)
-    assert(score > 10)
-    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
-    assert_almost_equal(offset, 0.0)
-    assert(score > 10)
-    offset, score = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
-    assert(score < 10) # No good offset found
-    offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=1) 
-    assert(score < 10) # No good offset found
+    results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
+    assert_almost_equal(results["offset"], 12.26)
+    assert(results["score"] > 10)
+    results = find_offset(path('timbl_1.mp3'), path('timbl_3.mp3'), hop_length=160, trim=35)
+    assert_almost_equal(results["offset"], 12.24)
+    assert(results["score"] > 10)
+    results = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
+    assert_almost_equal(results["offset"], 0.0)
+    assert(results["score"] > 10)
+    results = find_offset(path('timbl_2.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35) 
+    assert_almost_equal(results["offset"], 0.0)
+    assert(results["score"] > 10)
+    results = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35) 
+    assert(results["score"] < 10) # No good results["offset"] found
+    results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=1) 
+    assert(results["score"] < 10) # No good results["offset"] found
     with assert_raises(InsufficientAudioException):
-        offset, score = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=0.1)
+        results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=0.1)
 
 def test_ensure_non_zero():
     signal = np.zeros(100)
