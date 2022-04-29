@@ -17,8 +17,26 @@
 from nose.tools import *
 from audio_offset_finder.audio_offset_finder import *
 from numpy.testing import *
+from io import StringIO
+from unittest.mock import patch
 import numpy as np
-import os
+import os, types
+from importlib.machinery import ModuleSpec, SourceFileLoader
+from importlib.util import spec_from_loader, module_from_spec
+import argparse
+
+def import_from_source( name : str, file_path : str ) -> types.ModuleType:
+    loader : SourceFileLoader = SourceFileLoader(name, file_path)
+    spec : ModuleSpec = spec_from_loader(loader.name, loader)
+    module : types.ModuleType = module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+script_path : str = os.path.abspath(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "bin", "audio-offset-finder",
+    )
+)
 
 def path(test_file):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), 'audio', test_file))
@@ -67,3 +85,13 @@ def test_cross_correlation():
     m2 = m1
     c = cross_correlation(m1, m2, 2)
     assert_equal(np.argmax(c), 0)
+
+def test_tool():
+    tool : types.ModuleType = import_from_source("audio-offset-finder", script_path)
+    args="--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 --trim 35".split()
+    with patch('sys.stdout', new=StringIO()) as fakeStdout:
+        tool.main(args)
+        output = fakeStdout.getvalue().strip()
+        assert_true(output)
+        assert_in("ffset: 12.26", output)
+        assert_in("core: 21.10", output)
