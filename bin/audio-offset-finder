@@ -28,10 +28,11 @@ def main():
     parser.add_argument('--within', metavar='audio file', type=str, help='Within file')
     parser.add_argument('--sr', metavar='sample rate', type=int, default=8000, help='Target sample rate during downsampling')
     parser.add_argument('--trim', metavar='seconds', type=int, default=60*15, help='Only uses first n seconds of audio files')
+    parser.add_argument('--resolution', metavar='samples', type=int, default=128, help='Resolution (maximum accuracy) of search in samples')
     args = parser.parse_args()
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
-    offset, score = find_offset(args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim))
+    offset, score = find_offset(args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution))
     print("Offset: %s (seconds)" % str(offset))
     print("Standard score: %s" % str(score))
 
