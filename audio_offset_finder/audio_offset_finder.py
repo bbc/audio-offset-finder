@@ -26,9 +26,7 @@ class InsufficientAudioException(Exception):
 def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     return [np.transpose(librosa.feature.mfcc(y=audio, sr=fs, n_fft=nfft, win_length=win_length, hop_length=hop_length, n_mfcc=numcep))]
 
-def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, correl_nframes=None):
-    nfft=512 #samples to use in FFT when calculating MFCCs
-
+def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512, plot=False):
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     # Removing warnings because of 18 bits block size
@@ -47,16 +45,12 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     mfcc1 = std_mfcc(mfcc1)
     mfcc2 = std_mfcc(mfcc2)
 
-    #Adjust correl_nframes to match the length of audio supplied, to avoid buffer overruns
-    if correl_nframes is None:
-        correl_nframes = int(20 * fs / hop_length) #default to cross-correlating 20 secs of audio
-    correl_nframes_actual = min(correl_nframes, len(mfcc1) - 1, len(mfcc2) - 1)
-    if correl_nframes_actual < 10:
-        raise InsufficientAudioException("Not enough audio to analyse - try longer clips or do less trimming.")
-    if correl_nframes_actual < correl_nframes:
-        logging.warning("Audio clip(s) are shorter than expected - accuracy may be reduced.")
+    #Derive correl_nframes from the length of audio supplied, to avoid buffer overruns
+    correl_nframes = min(int(len(mfcc1)/3), len(mfcc2), 2000)
+    if correl_nframes < 10:
+        raise InsufficientAudioException("Not enough audio to analyse - try longer clips, less trimming, or higher resolution.")
 
-    c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes_actual)
+    c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = (max_k_index) * hop_length / fs
     
