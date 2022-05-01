@@ -38,7 +38,7 @@ To provide additional information about the accuracy of the result in addition t
 Testing
 -------
 
-    $ nosetests
+    $ pytest
 
 Licensing terms and authorship
 ------------------------------
