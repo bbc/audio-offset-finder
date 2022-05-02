@@ -30,8 +30,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install flake8 pytest pipreqs
+        # create a requirements.txt by examining source code
+        ln bin/audio-offset-finder bin/audio-offset-finder.py
+        pipreqs
+        rm bin/audio-offset-finder.py
+        if [ -f requirements.txt ]; then echo "requirements.txt"; cat requirements.txt; pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
