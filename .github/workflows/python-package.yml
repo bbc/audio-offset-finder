@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9"] # no 3.10 yet - see https://github.com/bbc/audio-offset-finder/issues/20
 
     steps:
     - uses: actions/checkout@v3
