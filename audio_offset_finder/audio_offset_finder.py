@@ -17,14 +17,25 @@
 from subprocess import Popen, PIPE
 from scipy.io import wavfile
 import librosa
-import os, tempfile, warnings, logging
+import os
+import tempfile
+import warnings
 import numpy as np
+
 
 class InsufficientAudioException(Exception):
     pass
 
+
 def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
-    return [np.transpose(librosa.feature.mfcc(y=audio, sr=fs, n_fft=nfft, win_length=win_length, hop_length=hop_length, n_mfcc=numcep))]
+    return [np.transpose(librosa.feature.mfcc(
+        y=audio,
+        sr=fs,
+        n_fft=nfft,
+        win_length=win_length,
+        hop_length=hop_length,
+        n_mfcc=numcep))]
+
 
 def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512, plot=False):
     tmp1 = convert_and_trim(file1, fs, trim)
@@ -45,19 +56,21 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     mfcc1 = std_mfcc(mfcc1)
     mfcc2 = std_mfcc(mfcc2)
 
-    #Derive correl_nframes from the length of audio supplied, to avoid buffer overruns
+    # Derive correl_nframes from the length of audio supplied, to avoid buffer overruns
     correl_nframes = min(int(len(mfcc1)/3), len(mfcc2), 2000)
     if correl_nframes < 10:
-        raise InsufficientAudioException("Not enough audio to analyse - try longer clips, less trimming, or higher resolution.")
+        raise InsufficientAudioException(
+            "Not enough audio to analyse - try longer clips, less trimming, or higher resolution.")
 
     c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
     offset = (max_k_index) * hop_length / fs
-    
-    score = (c[max_k_index] - np.mean(c)) / np.std(c) # standard score of peak
+
+    score = (c[max_k_index] - np.mean(c)) / np.std(c)  # standard score of peak
     os.remove(tmp1)
     os.remove(tmp2)
-    return {"offset":offset, "score":score, "correlation":c}
+    return {"offset": offset, "score": score, "correlation": c}
+
 
 def ensure_non_zero(signal):
     # We add a little bit of static to avoid
@@ -65,6 +78,7 @@ def ensure_non_zero(signal):
     # during MFCC computation
     signal += np.random.random(len(signal)) * 10**-10
     return signal
+
 
 def cross_correlation(mfcc1, mfcc2, nframes):
     n1, mdim1 = mfcc1.shape
@@ -76,16 +90,18 @@ def cross_correlation(mfcc1, mfcc2, nframes):
         c[k] = np.linalg.norm(cc)
     return c
 
+
 def std_mfcc(mfcc):
     return (mfcc - np.mean(mfcc, axis=0)) / np.std(mfcc, axis=0)
+
 
 def convert_and_trim(afile, fs, trim):
     tmp = tempfile.NamedTemporaryFile(mode='r+b', prefix='offset_', suffix='.wav')
     tmp_name = tmp.name
     tmp.close()
     psox = Popen([
-        'ffmpeg', '-loglevel', 'panic', '-i', afile, 
-        '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim), 
+        'ffmpeg', '-loglevel', 'panic', '-i', afile,
+        '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim),
         '-acodec', 'pcm_s16le', tmp_name
     ], stderr=PIPE)
     psox.communicate()
