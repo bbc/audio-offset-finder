@@ -23,7 +23,11 @@ import sys
 
 def main(argv):
     parser = argparse.ArgumentParser(
-        description="Find the offset of an audio file within another one",
+        description=("Find the offset of one audio file within another.\n"
+                     "Returns the offset in seconds from the start of the 'within' file to the start of the 'offset-of' one.\n"
+                     "A negative offset implies that the 'within' file starts after the 'offset-of' one.\n\n"
+                     "Also returns the 'standard score' of the correlation peak.  Scores >10 imply a good probability that "
+                     "the offset is accurate to within the precision of the tool (around 0.01s, adjustable)"),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('--find-offset-of', metavar='audio file', type=str,

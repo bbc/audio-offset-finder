@@ -68,7 +68,8 @@ def test_find_offset():
     assert results["score"] > 10
 
     results = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35)
-    assert results["score"] < 10  # No good results["offset"] found
+    assert pytest.approx(results["offset"]) == -12.26
+    assert results["score"] > 10
 
     results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=1)
     assert results["score"] < 10  # No good results["offset"] found
@@ -113,7 +114,7 @@ def test_tool():
         output = fakeStdout.getvalue().strip()
         assert output, "audio_offset_finder did not produce any output"
         assert "ffset: 12.26" in output
-        assert "core: 21.10" in output
+        assert "core: 28.99" in output
     assert os.path.isfile(plot_file_path), "audio_offset_finder did not create a plot file"
     temp_dir.cleanup()
 
