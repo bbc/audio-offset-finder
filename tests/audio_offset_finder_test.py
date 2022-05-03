@@ -99,12 +99,24 @@ def test_tool():
     plot_file_path = os.path.join(temp_dir.name, "zzz.png")
     tool : types.ModuleType = import_from_source("audio-offset-finder", script_path)
     args = "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 --trim 35 --save-plot " + plot_file_path
-    args = args.split()
     with patch('sys.stdout', new=StringIO()) as fakeStdout:
-        tool.main(args)
+        tool.main(args.split())
         output = fakeStdout.getvalue().strip()
         assert output, "audio_offset_finder did not produce any output"
         assert "ffset: 12.26" in output
         assert "core: 21.10" in output
     assert os.path.isfile(plot_file_path), "audio_offset_finder did not create a plot file"
     temp_dir.cleanup()
+    
+    args = "--find-offset-of tests/audio/timbl_2.mp3"
+    with pytest.raises(SystemExit) as error:
+        tool.main(args.split())
+        assert error.type == SystemExit
+        assert error.value.code > 0
+
+    args =  "--within tests/audio/timbl_1.mp3"
+    with pytest.raises(SystemExit) as error:
+        tool.main(args.split())
+        assert error.type == SystemExit
+        assert error.value.code > 0
+    
