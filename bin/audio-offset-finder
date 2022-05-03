@@ -26,7 +26,6 @@ def main(argv):
         description="Find the offset of an audio file within another one",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-
     parser.add_argument('--find-offset-of', metavar='audio file', type=str,
                         help='Find the offset of file')
     parser.add_argument('--within', metavar='audio file', type=str,
