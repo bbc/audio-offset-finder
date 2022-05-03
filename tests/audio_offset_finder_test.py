@@ -24,6 +24,7 @@ import os, types
 from importlib.machinery import ModuleSpec, SourceFileLoader
 from importlib.util import spec_from_loader, module_from_spec
 import argparse
+import tempfile
 
 #Function to import code from a file
 def import_from_source( name : str, file_path : str ) -> types.ModuleType:
@@ -94,11 +95,16 @@ def test_cross_correlation():
     assert np.argmax(c) == 0
 
 def test_tool():
+    temp_dir = tempfile.TemporaryDirectory()
+    plot_file_path = os.path.join(temp_dir.name, "zzz.png")
     tool : types.ModuleType = import_from_source("audio-offset-finder", script_path)
-    args="--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 --trim 35".split()
+    args = "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 --trim 35 --save-plot " + plot_file_path
+    args = args.split()
     with patch('sys.stdout', new=StringIO()) as fakeStdout:
         tool.main(args)
         output = fakeStdout.getvalue().strip()
         assert output, "audio_offset_finder did not produce any output"
         assert "ffset: 12.26" in output
         assert "core: 21.10" in output
+    assert os.path.isfile(plot_file_path), "audio_offset_finder did not create a plot file"
+    temp_dir.cleanup()
