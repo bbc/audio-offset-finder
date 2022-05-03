@@ -46,7 +46,11 @@ def test_find_offset():
     assert results["score"] > 10
 
     results = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35)
+<<<<<<< HEAD
     assert pytest.approx(results["time_offset"]) == -12.26
+=======
+    assert pytest.approx(results["offset"]) == -12.26
+>>>>>>> 9f53e6c (Initial support for bidirectional search.)
     assert results["score"] > 10
 
     results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=1)

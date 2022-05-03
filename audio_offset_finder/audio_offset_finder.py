@@ -108,6 +108,22 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     return c, n_min, n_max
 
 
+def bidirectional_cross_correlation(mfcc1, mfcc2, nframes):
+    n1, mdim1 = mfcc1.shape
+    n2, mdim2 = mfcc2.shape
+    n_min = nframes - n1
+    n_max = n1 - nframes + 1
+    n = n_max - n_min
+    c = np.zeros(n)
+    for k in range(n_min, 0):
+        cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k:nframes-k]), axis=0)
+        c[k] = np.linalg.norm(cc)
+    for k in range(n_max):
+        cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[:nframes]), axis=0)
+        c[k] = np.linalg.norm(cc)
+    return c
+
+
 def std_mfcc(mfcc):
     return (mfcc - np.mean(mfcc, axis=0)) / np.std(mfcc, axis=0)
 
