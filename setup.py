@@ -29,9 +29,8 @@ setup(
     packages=['audio_offset_finder'],
     install_requires=[
         'scipy>=0.12.0',
-        'numpy',
-        'librosa', 
+        'numpy>=1.18.0,<1.22.0',
+        'librosa',
     ],
     scripts=['bin/audio-offset-finder'],
 )
-
