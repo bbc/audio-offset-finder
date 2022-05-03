@@ -29,12 +29,23 @@ def main():
     parser.add_argument('--sr', metavar='sample rate', type=int, default=8000, help='Target sample rate during downsampling')
     parser.add_argument('--trim', metavar='seconds', type=int, default=60*15, help='Only uses first n seconds of audio files')
     parser.add_argument('--resolution', metavar='samples', type=int, default=128, help='Resolution (maximum accuracy) of search in samples')
+    parser.add_argument('--show-plot', action='store_true', dest='show_plot', help='Display plot of cross-correlation results')
+    parser.add_argument('--save-plot', metavar='plot file', dest='plot_file', type=str, help='Save a plot of cross-correlation results to a file (format chosen from extension - png, ps, pdf, svg)')    
     args = parser.parse_args()
     if not (args.find_offset_of or args.within):
         parser.error("Please input audio files")
-    offset, score = find_offset(args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution))
-    print("Offset: %s (seconds)" % str(offset))
-    print("Standard score: %s" % str(score))
+    results = find_offset(args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution))
+    print("Offset: %s (seconds)" % str(results["offset"]))
+    print("Standard score: %s" % str(results["score"]))
+    if args.show_plot or args.plot_file is not None:
+        import matplotlib.pyplot as pyplot
+        pyplot.figure(figsize=(15, 5))
+        pyplot.plot(results["correlation"])
+        if args.plot_file is not None:
+            pyplot.savefig(args.plot_file)
+        if args.show_plot:
+            pyplot.show()
+
 
 if __name__ == '__main__':
     main()

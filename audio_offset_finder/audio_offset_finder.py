@@ -57,7 +57,7 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     score = (c[max_k_index] - np.mean(c)) / np.std(c) # standard score of peak
     os.remove(tmp1)
     os.remove(tmp2)
-    return offset, score
+    return {"offset":offset, "score":score, "correlation":c}
 
 def ensure_non_zero(signal):
     # We add a little bit of static to avoid

@@ -29,6 +29,12 @@ Usage
     Offset: 12.26 (seconds)
     Standard score: 21.102
 
+To provide additional information about the accuracy of the result in addition to the standard score, the --plot option shows a plot of the cross-correlation curve.  A single well-defined peak such as is shown in the image below is a good indication that the offset is correct.
+
+<div style="width: 400; align:center">
+<img alt="A line graph showing a sharp prominent peak emerging from low-level noise" src="example_plot.png" title="Example correlation peak" /> 
+</div>
+
 Testing
 -------
 

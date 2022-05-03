@@ -30,7 +30,8 @@ setup(
     install_requires=[
         'scipy>=0.12.0',
         'numpy',
-        'librosa', 
+        'librosa',
+        'matplotlib'
     ],
     scripts=['bin/audio-offset-finder'],
 )
