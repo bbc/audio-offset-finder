@@ -31,30 +31,26 @@ def test_find_offset():
     # timbl_3.mp3: File truncated at 12.223 seconds with white noise added to it
     results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35)
     assert pytest.approx(results["time_offset"]) == 12.26
-    assert results["score"] > 10
+    assert results["standard_score"] > 10
 
     results = find_offset(path('timbl_1.mp3'), path('timbl_3.mp3'), hop_length=160, trim=35)
     assert pytest.approx(results["time_offset"]) == 12.24
-    assert results["score"] > 10
+    assert results["standard_score"] > 10
 
     results = find_offset(path('timbl_1.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35)
     assert pytest.approx(results["time_offset"]) == 0.0
-    assert results["score"] > 10
+    assert results["standard_score"] > 10
 
     results = find_offset(path('timbl_2.mp3'), path('timbl_2.mp3'), hop_length=160, trim=35)
     assert pytest.approx(results["time_offset"]) == 0.0
-    assert results["score"] > 10
+    assert results["standard_score"] > 10
 
     results = find_offset(path('timbl_2.mp3'), path('timbl_1.mp3'), hop_length=160, trim=35)
-<<<<<<< HEAD
     assert pytest.approx(results["time_offset"]) == -12.26
-=======
-    assert pytest.approx(results["offset"]) == -12.26
->>>>>>> 9f53e6c (Initial support for bidirectional search.)
-    assert results["score"] > 10
+    assert results["standard_score"] > 10
 
     results = find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=1)
-    assert results["score"] < 10  # No good results["offset"] found
+    assert results["standard_score"] < 10  # No good results["offset"] found
 
     with pytest.raises(InsufficientAudioException):
         find_offset(path('timbl_1.mp3'), path('timbl_2.mp3'), hop_length=160, trim=0.1)

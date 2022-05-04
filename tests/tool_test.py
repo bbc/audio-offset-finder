@@ -77,3 +77,16 @@ def test_tool():
         tool.main(args3.split())
         assert error.type == SystemExit
         assert error.value.code > 0, "missing 'offset-of' file"
+
+
+def test_json():
+    import json
+    args = ("--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+            "--trim 35 --json")
+    with patch('sys.stdout', new=StringIO()) as fakeStdout:
+        tool.main(args.split())
+        output = fakeStdout.getvalue().strip()
+        json_array = json.loads(output)
+        assert len(json_array) == 2
+        assert pytest.approx(json_array["time_offset"]) == 12.26
+        assert json_array["standard_score"] > 10

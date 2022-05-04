@@ -74,12 +74,12 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     os.remove(tmp1)
     os.remove(tmp2)
     return {"time_offset": time_offset,
-            "frame_offset": max_k_index,
-            "score": score,
+            "frame_offset": int(max_k_index),
+            "standard_score": score,
             "correlation": c,
             "time_scale": time_scale,
-            "earliest_frame_offset": earliest_frame_offset,
-            "latest_frame_offset": latest_frame_offset}
+            "earliest_frame_offset": int(earliest_frame_offset),
+            "latest_frame_offset": int(latest_frame_offset)}
 
 
 def ensure_non_zero(signal):
