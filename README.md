@@ -43,7 +43,9 @@ Testing
 Licensing terms and authorship
 ------------------------------
 
-See 'COPYING' and 'AUTHORS' files.
+See the 'COPYING' and 'AUTHORS' files.
+
+For details of how to contribute changes, see CONTRIBUTING.md.
 
 The audio file used in the tests was downloaded from
 [Wikimedia Commons](http://en.wikipedia.org/wiki/File:Tim_Berners-Lee_-_Today_-_9_July_2008.flac),
