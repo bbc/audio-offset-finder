@@ -53,16 +53,54 @@ def main(argv):
                           fs=int(args.sr),
                           trim=int(args.trim),
                           hop_length=int(args.resolution))
-    print("Offset: %s (seconds)" % str(results["offset"]))
+    print("Offset: %s (seconds)" % str(results["time_offset"]))
     print("Standard score: %s" % str(results["score"]))
+
     if args.show_plot or args.plot_file is not None:
         import matplotlib.pyplot as pyplot
+        import matplotlib.ticker as ticker
+
+        cc = results["correlation"]
+        cc_length = len(cc)
+        plot_data = reorder_correlations(cc)
+
         pyplot.figure(figsize=(15, 5))
-        pyplot.plot(results["correlation"])
+        xaxis_range = range(results["earliest_frame_offset"], results["latest_frame_offset"])
+        pyplot.plot(xaxis_range, plot_data)
+
+        ax = pyplot.gca()
+        # Scale x values from frame numbers to time: t = mx + c, but c=0 for a symetrical cross-correlation
+        m = results["time_scale"]
+        ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * m))
+        ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins="auto"))
+        ax.xaxis.set_major_formatter(ticks_x)
+        ax.set_xlabel("Time offset /s", fontsize="12")
+        ax.set_ylabel("Cross-correlation coefficient", fontsize="12")
+        ax.set(yticklabels=[])
+        ax.tick_params(left=False)
+
+        plot_title = "Offset of %s in %s" % (args.find_offset_of, args.within)
+        pyplot.title(plot_title, fontsize=14)
+
+        peak_xvalue = results["frame_offset"]
+        if peak_xvalue > cc_length / 2:
+            peak_xvalue -= cc_length
+
+        pyplot.axvline(x=peak_xvalue, color="red", linestyle="dotted")
+
         if args.plot_file is not None:
             pyplot.savefig(args.plot_file)
         if args.show_plot:
             pyplot.show()
+
+
+# Re-order the cross-correlation array so that the zero offset is in the middle
+def reorder_correlations(cc):
+    from numpy import concatenate
+
+    num_elements = len(cc)
+    centre_index = int(num_elements / 2)
+    return concatenate((cc[centre_index:], cc[:centre_index]))
 
 
 if __name__ == '__main__':
