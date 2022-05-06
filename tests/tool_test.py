@@ -61,8 +61,8 @@ def test_tool():
         tool.main(args1.split())
         output = fakeStdout.getvalue().strip()
         assert output, "audio_offset_finder did not produce any output"
-        assert "ffset: 12.26" in output
-        assert "core: 28.99" in output
+        assert "Offset: 12.26" in output
+        assert "score: 28" in output  # Different FFmpeg versions can slightly alter this value, so don't be too strict
     assert os.path.isfile(plot_file_path), "audio_offset_finder did not create a plot file"
     temp_dir.cleanup()
 
