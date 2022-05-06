@@ -35,7 +35,12 @@ def import_from_source(name: str, file_path: str) -> types.ModuleType:
 
 
 script_path: str = os.path.abspath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bin", "audio-offset-finder",)
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "bin",
+        "audio-offset-finder",
+    )
 )
 
 
