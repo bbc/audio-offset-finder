@@ -13,6 +13,6 @@ Requested process:
  * If the word 'and' appears in the title of your pull request, it should probably be two requests.
  * A detailed pull request message that explains the purpose of the changes and answers any obvious questions about them is very helpful.
  * Wherever possible, submit tests for your patch/new feature so it can be tested easily.
- * Run pytest, and lint your code with flake8 using the settings in .github/workflows/python-package.yml to ensure that the pull request will pass automated CI checks.
+ * Run pytest, and reformat your code with black (https://github.com/psf/black) to ensure that the pull request will pass automated CI checks.
 
 **Please raise any issues with this project as a GitHub issue.**
