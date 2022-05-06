@@ -24,10 +24,12 @@ import numpy as np
 
 
 class InsufficientAudioException(Exception):
+    """Thrown when there isn't enough audio to process"""
     pass
 
 
 def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
+    """Wraps the librosa MFCC routine.  Somewhat present for historical reasons at this point."""
     return [np.transpose(librosa.feature.mfcc(
         y=audio,
         sr=fs,
@@ -37,7 +39,46 @@ def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
         n_mfcc=numcep))]
 
 
-def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512, plot=False):
+def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512):
+    """Find the offset time offset between two audio files.
+
+    This function takes in two file paths, and (assuming they are media files with a valid audio track)
+    compares them using cross-correlation of Mel Frequency Cepstral Coefficients to try and calculate
+    the time offset between them, assuming that they are two recordings of the same thing.
+
+    Parameters
+    ----------
+    file1: string
+        A path to the reference file, in any format that FFMPEG can read
+    file2: string
+        A path to the comparison file, in any format that FFMPEG can read
+    fs: int
+        The sampling rate that the audio should be resampled to prior to MFCC calculation, in Hz
+    trim: int
+        The length to which input files will be truncated before processing, in seconds
+    hop_length: int
+        The number of samples (at the resampled rate "fs") to skip between each calculated MFCC frame
+    win_length: int
+        The length of the window function used to avoid transients adding spurious high frequencies to the MFCCs
+    nfft: int
+        The number of samples to use in the FFTs used to generate the MFCCs
+
+    Returns
+    -------
+    A dict containing the following:
+    time_offset (float): the most likely offset of file2 compared to file1, in seconds.  A positive value indicates that
+                         file2 starts after file1
+    frame_offset (int): the offset of file2 compared to file1, measured in MFCC frames
+    standard_score (float): the standard score of the highest correlation coefficient in the cross-correlation curve
+    correlation (numpy int array): the 1D array of correlation coefficients calculated for the two input files
+    time_scale: the scalar factor that is multiplied to frame offsets to convert them to time offsets
+    earliest_frame_offset (int): the earliest offset searched for a correlation.  Always negative.
+    latest_frame_offset (int): the latest offset searched for a correlation.  Always positive.
+
+    Throws
+    ------
+    InsufficientAudioException if the audio supplied is too short to analyse.
+    """
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
     # Removing warnings because of 18 bits block size
@@ -83,9 +124,8 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
 
 
 def ensure_non_zero(signal):
-    # We add a little bit of static to avoid
-    # 'divide by zero encountered in log'
-    # during MFCC computation
+    """Add very low level white noise to a signal to prevent divide-by-zero errors during MFCC calculation.
+    (May be redundant following the switch to librosa for MFCCs)"""
     signal += np.random.random(len(signal)) * 10**-10
     return signal
 
@@ -93,6 +133,26 @@ def ensure_non_zero(signal):
 # returns an array in which the first half represents an offset of mfcc2 within mfcc2,
 # and the second half (accessed by negative indices) vice-versa.
 def cross_correlation(mfcc1, mfcc2, nframes):
+    """Calculate the cross-correlation curve between two numpy arrays (assumed to be MFCCs).
+
+    Parameters
+    ----------
+    mfcc1: numpy array
+        The first array to correlate
+    mfcc2: numpy array
+        The second array to correlate
+    nframes: int
+        The number of frames to correlate between the two arrays
+
+    Returns
+    -------
+    A numpy array containing the cross-correlation of the two arrays for each possible offset between them.
+    The zeroth element contains the cross-correlation with no offset.
+    The first half of the array (up to len(c)/2) contains offsets of mfcc2 within mfcc1.
+    The second half of the array contains offsets of mfcc1 within mfcc2.
+    This is done so that accessing the array with an index in the range -(len(c)/2) to (len(c)/2) will return
+    an appropriate cross-correlation coefficient for that offset.
+    """
     n1, mdim1 = mfcc1.shape
     n2, mdim2 = mfcc2.shape
     n_min = nframes - n1
@@ -108,27 +168,27 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     return c, n_min, n_max
 
 
-def bidirectional_cross_correlation(mfcc1, mfcc2, nframes):
-    n1, mdim1 = mfcc1.shape
-    n2, mdim2 = mfcc2.shape
-    n_min = nframes - n1
-    n_max = n1 - nframes + 1
-    n = n_max - n_min
-    c = np.zeros(n)
-    for k in range(n_min, 0):
-        cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k:nframes-k]), axis=0)
-        c[k] = np.linalg.norm(cc)
-    for k in range(n_max):
-        cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[:nframes]), axis=0)
-        c[k] = np.linalg.norm(cc)
-    return c
-
-
-def std_mfcc(mfcc):
-    return (mfcc - np.mean(mfcc, axis=0)) / np.std(mfcc, axis=0)
+def std_mfcc(array):
+    """Returns the standard score for each offset of a given numpy array"""
+    return (array - np.mean(array, axis=0)) / np.std(array, axis=0)
 
 
 def convert_and_trim(afile, fs, trim):
+    """Converts the input media to a temporary 16-bit WAV file and trims it to length.
+
+    Parameters
+    ----------
+    afile: string
+        The input media file to process.  It must contain at least one audio track.
+    fs: int
+        The sample rate that the audio should be converted to during the conversion
+    trim: float
+        The length to which the output audio should be trimmed, in seconds.  (Audio beyond this point will be discarded.)
+
+    Returns
+    -------
+    A string containing the path of the processed media file.  You should delete this file after use.
+    """
     tmp = tempfile.NamedTemporaryFile(mode='r+b', prefix='offset_', suffix='.wav')
     tmp_name = tmp.name
     tmp.close()
