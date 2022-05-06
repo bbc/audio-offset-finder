@@ -81,10 +81,6 @@ def find_offset_between_files(file1, file2, fs=8000, trim=60*15, hop_length=128,
     """
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
-    # Removing warnings because of 18 bits block size
-    # outputted by ffmpeg
-    # https://trac.ffmpeg.org/ticket/1843
-#    warnings.simplefilter("ignore", wavfile.WavFileWarning)
     a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0 ** 15)
     a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
     offset_dict = find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
