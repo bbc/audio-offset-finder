@@ -39,7 +39,7 @@ def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
         n_mfcc=numcep))]
 
 
-def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512):
+def find_offset_between_files(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512):
     """Find the offset time offset between two audio files.
 
     This function takes in two file paths, and (assuming they are media files with a valid audio track)
@@ -84,13 +84,55 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     # Removing warnings because of 18 bits block size
     # outputted by ffmpeg
     # https://trac.ffmpeg.org/ticket/1843
-    warnings.simplefilter("ignore", wavfile.WavFileWarning)
+#    warnings.simplefilter("ignore", wavfile.WavFileWarning)
     a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0 ** 15)
     a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0 ** 15)
-    # We truncate zeroes off the beginning of each signals
-    # (only seems to happen in ffmpeg, not in sox)
-    a1 = ensure_non_zero(a1)
-    a2 = ensure_non_zero(a2)
+    offset_dict = find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
+    os.remove(tmp1)
+    os.remove(tmp2)
+    return offset_dict
+
+
+def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length=256, nfft=512):
+    """Find the offset time offset between two audio files.
+
+    This function takes in two numpy arrays (assumed to be PCM audio) and compares them using cross-correlation of
+    Mel Frequency Cepstral Coefficients to try and calculate the time offset between them, assuming that they are
+    two recordings of the same thing.
+
+    Parameters
+    ----------
+    buffer1: numpy array
+        The first audio buffer to compare
+    buffer2: numpy array
+        The second audio buffer to compare
+    fs: int
+        The sampling rate of the two audio buffers, in Hz
+    hop_length: int
+        The number of samples to skip between each calculated MFCC frame
+    win_length: int
+        The length of the window function used to avoid transients adding spurious high frequencies to the MFCCs
+    nfft: int
+        The number of samples to use in the FFTs used to generate the MFCCs
+
+    Returns
+    -------
+    A dict containing the following:
+    time_offset (float): the most likely offset of buffer2 compared to buffer1, in seconds.  A positive value indicates that
+                         buffer2 starts after buffer1
+    frame_offset (int): the offset of buffer2 compared to buffer1, measured in MFCC frames
+    standard_score (float): the standard score of the highest correlation coefficient in the cross-correlation curve
+    correlation (numpy int array): the 1D array of correlation coefficients calculated for the two input buffers
+    time_scale: the scalar factor that is multiplied to frame offsets to convert them to time offsets
+    earliest_frame_offset (int): the earliest offset searched for a correlation.  Always negative.
+    latest_frame_offset (int): the latest offset searched for a correlation.  Always positive.
+
+    Throws
+    ------
+    InsufficientAudioException if the audio supplied is too short to analyse.
+    """
+    a1 = ensure_non_zero(buffer1)
+    a2 = ensure_non_zero(buffer2)
 
     mfcc1 = mfcc(a1, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
     mfcc2 = mfcc(a2, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
@@ -112,8 +154,6 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
     time_offset = (max_k_frame_offset) * time_scale
 
     score = (c[max_k_index] - np.mean(c)) / np.std(c)  # standard score of peak
-    os.remove(tmp1)
-    os.remove(tmp2)
     return {"time_offset": time_offset,
             "frame_offset": int(max_k_index),
             "standard_score": score,

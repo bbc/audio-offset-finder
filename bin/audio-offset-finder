@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from audio_offset_finder.audio_offset_finder import find_offset
+from audio_offset_finder.audio_offset_finder import find_offset_between_files
 import argparse
 import sys
 
@@ -50,7 +50,7 @@ def main(argv):
     args = parser.parse_args(argv)
     if not (args.find_offset_of and args.within):
         parser.error("Please provide input audio files")
-    results = find_offset(args.within,
+    results = find_offset_between_files(args.within,
                           args.find_offset_of,
                           fs=int(args.sr),
                           trim=int(args.trim),
