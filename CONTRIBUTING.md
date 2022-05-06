@@ -13,6 +13,10 @@ Requested process:
  * If the word 'and' appears in the title of your pull request, it should probably be two requests.
  * A detailed pull request message that explains the purpose of the changes and answers any obvious questions about them is very helpful.
  * Wherever possible, submit tests for your patch/new feature so it can be tested easily.
- * Run pytest, and reformat your code with black (https://github.com/psf/black) to ensure that the pull request will pass automated CI checks.
+ * Run pytest, and reformat your code with black (https://github.com/psf/black)* to ensure that the pull request will pass automated CI checks.
+
+*Please make sure you install the version of black specified in setup.cfg, otherwise version incompatibilities may cause pull requests to be rejected.  One easy way to do this is to editably install the audio\_offset\_finder package locally using:
+    pip install -e ".[dev]"
+
 
 **Please raise any issues with this project as a GitHub issue.**

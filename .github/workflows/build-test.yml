@@ -46,6 +46,8 @@ jobs:
         if [ -f requirements.txt ]; then echo "requirements.txt"; cat requirements.txt; pip install -r requirements.txt; fi
     - name: Lint with black
       uses: psf/black@stable
+      with:
+        version: "19.10b0"
     - name: Test with pytest
       run: |
         pytest
