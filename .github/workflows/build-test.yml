@@ -47,7 +47,7 @@ jobs:
     - name: Lint with black
       uses: psf/black@stable
       with:
-        version: "19.10b0"
+        version: "22.3.0"
     - name: Test with pytest
       run: |
         pytest
