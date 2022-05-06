@@ -62,14 +62,24 @@ def find_offset(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=25
         raise InsufficientAudioException(
             "Not enough audio to analyse - try longer clips, less trimming, or higher resolution.")
 
-    c = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
+    c, earliest_frame_offset, latest_frame_offset = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
-    offset = (max_k_index) * hop_length / fs
+    max_k_frame_offset = max_k_index
+    if max_k_index > len(c) / 2:
+        max_k_frame_offset -= len(c)
+    time_scale = hop_length / fs
+    time_offset = (max_k_frame_offset) * time_scale
 
     score = (c[max_k_index] - np.mean(c)) / np.std(c)  # standard score of peak
     os.remove(tmp1)
     os.remove(tmp2)
-    return {"offset": offset, "score": score, "correlation": c}
+    return {"time_offset": time_offset,
+            "frame_offset": max_k_index,
+            "score": score,
+            "correlation": c,
+            "time_scale": time_scale,
+            "earliest_frame_offset": earliest_frame_offset,
+            "latest_frame_offset": latest_frame_offset}
 
 
 def ensure_non_zero(signal):
@@ -80,15 +90,22 @@ def ensure_non_zero(signal):
     return signal
 
 
+# returns an array in which the first half represents an offset of mfcc2 within mfcc2,
+# and the second half (accessed by negative indices) vice-versa.
 def cross_correlation(mfcc1, mfcc2, nframes):
     n1, mdim1 = mfcc1.shape
     n2, mdim2 = mfcc2.shape
-    n = n1 - nframes + 1
+    n_min = nframes - n1
+    n_max = n1 - nframes + 1
+    n = n_max - n_min
     c = np.zeros(n)
-    for k in range(n):
+    for k in range(n_min, 0):
+        cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k:nframes-k]), axis=0)
+        c[k] = np.linalg.norm(cc)
+    for k in range(n_max):
         cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[:nframes]), axis=0)
         c[k] = np.linalg.norm(cc)
-    return c
+    return c, n_min, n_max
 
 
 def std_mfcc(mfcc):
