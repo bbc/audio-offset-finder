@@ -25,21 +25,20 @@ import numpy as np
 
 class InsufficientAudioException(Exception):
     """Thrown when there isn't enough audio to process"""
+
     pass
 
 
 def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     """Wraps the librosa MFCC routine.  Somewhat present for historical reasons at this point."""
-    return [np.transpose(librosa.feature.mfcc(
-        y=audio,
-        sr=fs,
-        n_fft=nfft,
-        win_length=win_length,
-        hop_length=hop_length,
-        n_mfcc=numcep))]
+    return [
+        np.transpose(
+            librosa.feature.mfcc(y=audio, sr=fs, n_fft=nfft, win_length=win_length, hop_length=hop_length, n_mfcc=numcep)
+        )
+    ]
 
 
-def find_offset_between_files(file1, file2, fs=8000, trim=60*15, hop_length=128, win_length=256, nfft=512):
+def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=128, win_length=256, nfft=512):
     """Find the offset time offset between two audio files.
 
     This function takes in two file paths, and (assuming they are media files with a valid audio track)
@@ -136,10 +135,11 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     mfcc2 = std_mfcc(mfcc2)
 
     # Derive correl_nframes from the length of audio supplied, to avoid buffer overruns
-    correl_nframes = min(int(len(mfcc1)/3), len(mfcc2), 2000)
+    correl_nframes = min(int(len(mfcc1) / 3), len(mfcc2), 2000)
     if correl_nframes < 10:
         raise InsufficientAudioException(
-            "Not enough audio to analyse - try longer clips, less trimming, or higher resolution.")
+            "Not enough audio to analyse - try longer clips, less trimming, or higher resolution."
+        )
 
     c, earliest_frame_offset, latest_frame_offset = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
     max_k_index = np.argmax(c)
@@ -150,19 +150,21 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     time_offset = (max_k_frame_offset) * time_scale
 
     score = (c[max_k_index] - np.mean(c)) / np.std(c)  # standard score of peak
-    return {"time_offset": time_offset,
-            "frame_offset": int(max_k_index),
-            "standard_score": score,
-            "correlation": c,
-            "time_scale": time_scale,
-            "earliest_frame_offset": int(earliest_frame_offset),
-            "latest_frame_offset": int(latest_frame_offset)}
+    return {
+        "time_offset": time_offset,
+        "frame_offset": int(max_k_index),
+        "standard_score": score,
+        "correlation": c,
+        "time_scale": time_scale,
+        "earliest_frame_offset": int(earliest_frame_offset),
+        "latest_frame_offset": int(latest_frame_offset),
+    }
 
 
 def ensure_non_zero(signal):
     """Add very low level white noise to a signal to prevent divide-by-zero errors during MFCC calculation.
     (May be redundant following the switch to librosa for MFCCs)"""
-    signal += np.random.random(len(signal)) * 10**-10
+    signal += np.random.random(len(signal)) * 10 ** -10
     return signal
 
 
@@ -196,10 +198,10 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     n = n_max - n_min
     c = np.zeros(n)
     for k in range(n_min, 0):
-        cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k:nframes-k]), axis=0)
+        cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k : nframes - k]), axis=0)
         c[k] = np.linalg.norm(cc)
     for k in range(n_max):
-        cc = np.sum(np.multiply(mfcc1[k:k+nframes], mfcc2[:nframes]), axis=0)
+        cc = np.sum(np.multiply(mfcc1[k : k + nframes], mfcc2[:nframes]), axis=0)
         c[k] = np.linalg.norm(cc)
     return c, n_min, n_max
 
@@ -225,14 +227,30 @@ def convert_and_trim(afile, fs, trim):
     -------
     A string containing the path of the processed media file.  You should delete this file after use.
     """
-    tmp = tempfile.NamedTemporaryFile(mode='r+b', prefix='offset_', suffix='.wav')
+    tmp = tempfile.NamedTemporaryFile(mode="r+b", prefix="offset_", suffix=".wav")
     tmp_name = tmp.name
     tmp.close()
-    psox = Popen([
-        'ffmpeg', '-loglevel', 'panic', '-i', afile,
-        '-ac', '1', '-ar', str(fs), '-ss', '0', '-t', str(trim),
-        '-acodec', 'pcm_s16le', tmp_name
-    ], stderr=PIPE)
+    psox = Popen(
+        [
+            "ffmpeg",
+            "-loglevel",
+            "panic",
+            "-i",
+            afile,
+            "-ac",
+            "1",
+            "-ar",
+            str(fs),
+            "-ss",
+            "0",
+            "-t",
+            str(trim),
+            "-acodec",
+            "pcm_s16le",
+            tmp_name,
+        ],
+        stderr=PIPE,
+    )
     psox.communicate()
     if not psox.returncode == 0:
         raise Exception("FFMpeg failed")

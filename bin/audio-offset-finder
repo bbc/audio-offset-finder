@@ -23,43 +23,44 @@ import sys
 
 def main(argv):
     parser = argparse.ArgumentParser(
-        description=("Find the offset of one audio file within another.\n"
-                     "Returns the offset in seconds from the start of the 'within' file to the start of the 'offset-of' one.\n"
-                     "A negative offset implies that the 'within' file starts after the 'offset-of' one.\n\n"
-                     "Also returns the 'standard score' of the correlation peak.  Scores >10 imply a good probability that "
-                     "the offset is accurate to within the precision of the tool (around 0.01s, adjustable)"),
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description=(
+            "Find the offset of one audio file within another.\n"
+            "Returns the offset in seconds from the start of the 'within' file to the start of the 'offset-of' one.\n"
+            "A negative offset implies that the 'within' file starts after the 'offset-of' one.\n\n"
+            "Also returns the 'standard score' of the correlation peak.  Scores >10 imply a good probability that "
+            "the offset is accurate to within the precision of the tool (around 0.01s, adjustable)"
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument('--find-offset-of', metavar='audio file', type=str,
-                        help='Find the offset of file')
-    parser.add_argument('--within', metavar='audio file', type=str,
-                        help='Within file')
-    parser.add_argument('--sr', metavar='sample rate', type=int, default=8000,
-                        help='Target sample rate during downsampling')
-    parser.add_argument('--trim', metavar='seconds', type=int, default=60*15,
-                        help='Only uses first n seconds of audio files')
-    parser.add_argument('--resolution', metavar='samples', type=int, default=128,
-                        help='Resolution (maximum accuracy) of search in samples')
-    parser.add_argument('--show-plot', action='store_true', dest='show_plot',
-                        help='Display plot of cross-correlation results')
-    parser.add_argument('--save-plot',  metavar='plot file', dest='plot_file', type=str,
-                        help=('Save a plot of cross-correlation results to a file '
-                              '(format matches extension - png, ps, pdf, svg)'))
-    parser.add_argument('--json', action='store_true', dest='output_json',
-                        help='Output in JSON for further processing')
+    parser.add_argument("--find-offset-of", metavar="audio file", type=str, help="Find the offset of file")
+    parser.add_argument("--within", metavar="audio file", type=str, help="Within file")
+    parser.add_argument("--sr", metavar="sample rate", type=int, default=8000, help="Target sample rate during downsampling")
+    parser.add_argument(
+        "--trim", metavar="seconds", type=int, default=60 * 15, help="Only uses first n seconds of audio files"
+    )
+    parser.add_argument(
+        "--resolution", metavar="samples", type=int, default=128, help="Resolution (maximum accuracy) of search in samples"
+    )
+    parser.add_argument("--show-plot", action="store_true", dest="show_plot", help="Display plot of cross-correlation results")
+    parser.add_argument(
+        "--save-plot",
+        metavar="plot file",
+        dest="plot_file",
+        type=str,
+        help=("Save a plot of cross-correlation results to a file " "(format matches extension - png, ps, pdf, svg)"),
+    )
+    parser.add_argument("--json", action="store_true", dest="output_json", help="Output in JSON for further processing")
     args = parser.parse_args(argv)
     if not (args.find_offset_of and args.within):
         parser.error("Please provide input audio files")
-    results = find_offset_between_files(args.within,
-                          args.find_offset_of,
-                          fs=int(args.sr),
-                          trim=int(args.trim),
-                          hop_length=int(args.resolution))
+    results = find_offset_between_files(
+        args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution)
+    )
 
     if args.output_json:
         import json
-        json_results = {"time_offset": results["time_offset"],
-                        "standard_score": results["standard_score"]}
+
+        json_results = {"time_offset": results["time_offset"], "standard_score": results["standard_score"]}
         print(json.dumps(json_results))
     else:
         print("Offset: %s (seconds)" % str(results["time_offset"]))
@@ -93,7 +94,7 @@ def plot_results(args, results):
     ax = pyplot.gca()
     # Scale x values from frame numbers to time: t = mx + c, but c=0 for a symetrical cross-correlation
     m = results["time_scale"]
-    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x * m))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: "{0:g}".format(x * m))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins="auto"))
     ax.xaxis.set_major_formatter(ticks_x)
     ax.set_xlabel("Time offset /s", fontsize="12")
@@ -116,5 +117,5 @@ def plot_results(args, results):
         pyplot.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
