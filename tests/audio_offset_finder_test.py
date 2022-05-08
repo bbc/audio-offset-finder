@@ -55,6 +55,9 @@ def test_find_offset_between_files():
     with pytest.raises(InsufficientAudioException):
         find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=0.1)
 
+    results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, max_frames=100)
+    print((results["time_offset"], results["standard_score"]))
+
 
 def test_ensure_non_zero():
     signal = np.zeros(100)
@@ -72,9 +75,17 @@ def test_std_mfcc():
 
 def test_cross_correlation():
     m1 = np.array([[-0.5, -0.4, -0.4], [0.5, 0.5, 0.4], [0.1, -0.1, 0.1]])
-    m2 = m1[1:]
+    m2 = np.array([[0.5, 0.5, 0.4], [0.1, -0.1, 0.1], [-0.6, 0.0, -0.3]])
     c, n_min, n_max = cross_correlation(m1, m2, 2)
     assert np.argmax(c) == 1
+    assert n_min == -1
+    assert n_max == 2
+
+    c, n_min, n_max = cross_correlation(m2, m1, 2)
+    offset = np.argmax(c)
+    if offset > len(c) / 2:  # argmax doesn't know that the cross-correlation array is centred on 0
+        offset -= len(c)
+    assert offset == -1
     assert n_min == -1
     assert n_max == 2
 

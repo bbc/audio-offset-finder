@@ -38,7 +38,7 @@ def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     ]
 
 
-def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=128, win_length=256, nfft=512):
+def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=128, win_length=256, nfft=512, max_frames=2000):
     """Find the offset time offset between two audio files.
 
     This function takes in two file paths, and (assuming they are media files with a valid audio track)
@@ -88,7 +88,7 @@ def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=12
     return offset_dict
 
 
-def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length=256, nfft=512):
+def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length=256, nfft=512, max_frames=2000):
     """Find the offset time offset between two audio files.
 
     This function takes in two numpy arrays (assumed to be PCM audio) and compares them using cross-correlation of
@@ -135,7 +135,7 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     mfcc2 = std_mfcc(mfcc2)
 
     # Derive correl_nframes from the length of audio supplied, to avoid buffer overruns
-    correl_nframes = min(int(len(mfcc1) / 3), len(mfcc2), 2000)
+    correl_nframes = min(int(len(mfcc1) / 3), len(mfcc2), max_frames)
     if correl_nframes < 10:
         raise InsufficientAudioException(
             "Not enough audio to analyse - try longer clips, less trimming, or higher resolution."
@@ -193,17 +193,17 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     """
     n1, mdim1 = mfcc1.shape
     n2, mdim2 = mfcc2.shape
-    n_min = nframes - n1
-    n_max = n1 - nframes + 1
-    n = n_max - n_min
+    o_min = nframes - min(n1, n2)
+    o_max = min(n1, n2) - nframes + 1
+    n = o_max - o_min
     c = np.zeros(n)
-    for k in range(n_min, 0):
+    for k in range(o_min, 0):
         cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k : nframes - k]), axis=0)
         c[k] = np.linalg.norm(cc)
-    for k in range(n_max):
+    for k in range(0, o_max):
         cc = np.sum(np.multiply(mfcc1[k : k + nframes], mfcc2[:nframes]), axis=0)
         c[k] = np.linalg.norm(cc)
-    return c, n_min, n_max
+    return c, o_min, o_max
 
 
 def std_mfcc(array):
