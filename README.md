@@ -30,15 +30,19 @@ Usage
 To use the command-line tool:
 
     $ audio-offset-finder --help
-    $ audio-offset-finder --find-offset-of file1.wav --within file2.wav --show-plot
+    $ audio-offset-finder --find-offset-of file1.wav --within file2.wav
     Offset: 12.26 (seconds)
     Standard score: 28.99
 
-    $ audio-offset-finder --find-offset-of file2.wav --within file1.wav --save-plot plot_file.png
+    $ audio-offset-finder --find-offset-of file2.wav --within file1.wav
     Offset: -12.26 (seconds)
     Standard score: 28.99
 
-To provide additional information about the accuracy of the result in addition to the standard score, the --plot option shows a plot of the cross-correlation curve.  A single well-defined peak such as is shown in the image below is a good indication that the offset is correct.
+To provide additional information about the accuracy of the result in addition to the standard score, the `--plot` option shows a plot of the cross-correlation curve, and the `--save-plot` option saves one to a file.  The two options can be used separately, or together if you want to both view the plot and save a copy of it:
+
+    $ audio-offset-finder --find-offset-of file2.wav --within file1.wav --plot --save-plot example.png
+
+A single well-defined peak such as the one shown in the image below is a good indication that the offset is correct.
 
 <div style="width: 400; align:center">
 <img alt="A line graph showing a cross-correlation curve with a sharp prominent peak emerging from low-level noise.  A dotted vertical line is overlaid at the position of the peak, indicating the position of the calculated offset." src="example_plot.png" title="Example correlation plot" />
