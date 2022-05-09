@@ -9,7 +9,7 @@ The tool outputs the calculated offset in seconds, and a ["standard score"](http
 
 The tool uses [FFmpeg](https://ffmpeg.org) for transcoding, so should work on all file formats supported by FFmpeg.  It is tested for compatibility with Python 3.8 and 3.9 on Linux, Windows and macOS.
 
-The aim of this open source project is to provide a simple tool and library that do one job well, and that can be the basis of customisation for more complex use cases.  The [forks of the base respository](https://github.com/bbc/audio-offset-finder/network/members) are worth exploring if you need a feature that is not included here.  The maintainers welcome pull requests with bug fixes, new features and other improvements that fit this philosophy - please see CONTRIBUTING.md for details.
+The aim of this open source project is to provide a simple tool and library that do one job well, and that can be the basis of customisation for more complex use cases.  The [forks of the base respository](https://github.com/bbc/audio-offset-finder/network/members) are worth exploring if you need a feature that is not included here.  The maintainers welcome pull requests with bug fixes, new features and other improvements that fit this philosophy - please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 Installation
 ------------
@@ -72,9 +72,9 @@ Testing
 Licensing terms and authorship
 ------------------------------
 
-See the 'COPYING' and 'AUTHORS' files.
+See the [COPYING](COPYING) and [AUTHORS](AUTHORS) files.
 
-For details of how to contribute changes, see CONTRIBUTING.md.
+For details of how to contribute changes, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The audio file used in the tests was downloaded from
 [Wikimedia Commons](http://en.wikipedia.org/wiki/File:Tim_Berners-Lee_-_Today_-_9_July_2008.flac),
