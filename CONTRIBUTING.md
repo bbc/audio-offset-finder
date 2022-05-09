@@ -15,7 +15,7 @@ Requested process:
  * Wherever possible, submit tests for your patch/new feature so it can be tested easily.
  * Run pytest, and reformat your code with black (https://github.com/psf/black)<sup>†</sup> to ensure that the pull request will pass automated CI checks.
 
-<sup>†</sup>Please make sure you install the version of black specified in setup.cfg, otherwise version incompatibilities may cause pull requests to be rejected.  One easy way to do this is to editably install the audio\_offset\_finder package locally using:
+<sup>†</sup>Please make sure you install the version of black specified in setup.cfg, otherwise version incompatibilities may cause pull requests to be rejected.  One easy way to do this is to [editably install](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs) the audio\_offset\_finder package locally using:
     pip install -e ".[dev]"
 
 

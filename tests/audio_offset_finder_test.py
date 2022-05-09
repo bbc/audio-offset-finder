@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import pytest
-from audio_offset_finder.audio_offset_finder import find_offset_between_files, ensure_non_zero, std_mfcc, cross_correlation
+from audio_offset_finder.audio_offset_finder import find_offset_between_files, std_mfcc, cross_correlation
 from audio_offset_finder.audio_offset_finder import InsufficientAudioException
 import numpy as np
 import os
@@ -57,12 +57,6 @@ def test_find_offset_between_files():
 
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, max_frames=100)
     print((results["time_offset"], results["standard_score"]))
-
-
-def test_ensure_non_zero():
-    signal = np.zeros(100)
-    assert len(np.where(signal == 0)[0]) == 100
-    assert len(np.where(ensure_non_zero(signal) == 0)[0]) == 0
 
 
 def test_std_mfcc():

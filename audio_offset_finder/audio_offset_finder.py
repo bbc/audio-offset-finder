@@ -80,8 +80,8 @@ def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=12
     """
     tmp1 = convert_and_trim(file1, fs, trim)
     tmp2 = convert_and_trim(file2, fs, trim)
-    a1 = wavfile.read(tmp1, mmap=True)[1] / (2.0**15)
-    a2 = wavfile.read(tmp2, mmap=True)[1] / (2.0**15)
+    a1 = wavfile.read(tmp1, mmap=True)[1].astype(float)
+    a2 = wavfile.read(tmp2, mmap=True)[1].astype(float)
     offset_dict = find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
     os.remove(tmp1)
     os.remove(tmp2)
@@ -126,11 +126,8 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     ------
     InsufficientAudioException if the audio supplied is too short to analyse.
     """
-    a1 = ensure_non_zero(buffer1)
-    a2 = ensure_non_zero(buffer2)
-
-    mfcc1 = mfcc(a1, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
-    mfcc2 = mfcc(a2, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
+    mfcc1 = mfcc(buffer1, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
+    mfcc2 = mfcc(buffer2, win_length=win_length, nfft=nfft, fs=fs, hop_length=hop_length, numcep=26)[0]
     mfcc1 = std_mfcc(mfcc1)
     mfcc2 = std_mfcc(mfcc2)
 
@@ -159,13 +156,6 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
         "earliest_frame_offset": int(earliest_frame_offset),
         "latest_frame_offset": int(latest_frame_offset),
     }
-
-
-def ensure_non_zero(signal):
-    """Add very low level white noise to a signal to prevent divide-by-zero errors during MFCC calculation.
-    (May be redundant following the switch to librosa for MFCCs)"""
-    signal += np.random.random(len(signal)) * 10**-10
-    return signal
 
 
 # returns an array in which the first half represents an offset of mfcc2 within mfcc2,
