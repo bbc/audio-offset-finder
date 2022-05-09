@@ -14,7 +14,7 @@ The aim of this open source project is to provide a simple tool and library that
 Installation
 ------------
 
-To install from this source directory once downloaded:
+To install from source once downloaded [from GitHub](https://github.com/bbc/audio-offset-finder/):
 
     $ pip install .
 
@@ -45,7 +45,7 @@ To provide additional information about the accuracy of the result in addition t
 A single well-defined peak such as the one shown in the image below is a good indication that the offset is correct.
 
 <div style="width: 400; align:center">
-<img alt="A line graph showing a cross-correlation curve with a sharp prominent peak emerging from low-level noise.  A dotted vertical line is overlaid at the position of the peak, indicating the position of the calculated offset." src="example_plot.png" title="Example correlation plot" />
+<img alt="A line graph showing a cross-correlation curve with a sharp prominent peak emerging from low-level noise.  A dotted vertical line is overlaid at the position of the peak, indicating the position of the calculated offset." src="https://github.com/bbc/audio-offset-finder/raw/master/example_plot.png" title="Example correlation plot" />
 </div>
 
 Library Usage
