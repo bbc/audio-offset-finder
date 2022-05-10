@@ -51,3 +51,30 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+  publish:
+    name: Publish PyPi package
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+    - name: Install pypa/build
+      run: |
+        python3 -m pip install build --user
+    - name: Build a binary wheel and a source tarball
+      run: |
+        python -m build --sdist --wheel  --outdir dist/ .
+    - name: Publish to TestPyPI on merge (push to protected branch)
+      if: github.event_name == 'push'
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.TEST_PYPI_PACKAGE_UPLOAD_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+    - name: Publish to PyPI on tagged commit merge (push to protected branch)
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_PACKAGE_UPLOAD_TOKEN }}
