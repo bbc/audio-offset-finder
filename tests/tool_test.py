@@ -93,4 +93,4 @@ def test_json():
         json_array = json.loads(output)
         assert len(json_array) == 2
         assert pytest.approx(json_array["time_offset"]) == 12.26
-        assert json_array["standard_score"] > 10
+        assert pytest.approx(json_array["standard_score"], rel=1e-2) == 28.99
