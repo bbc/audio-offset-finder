@@ -36,7 +36,10 @@ def import_from_source(name: str, file_path: str) -> types.ModuleType:
 
 script_path: str = os.path.abspath(
     os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "bin", "audio-offset-finder",
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "bin",
+        "audio-offset-finder",
     )
 )
 
@@ -55,9 +58,10 @@ def test_reorder_correlations():
 def test_tool():
     temp_dir = tempfile.TemporaryDirectory()
     plot_file_path = os.path.join(temp_dir.name, "zzz.png")
-    args1 = ("--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
-             "--trim 35 --save-plot ") + plot_file_path
-    with patch('sys.stdout', new=StringIO()) as fakeStdout:
+    args1 = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 " "--trim 35 --save-plot "
+    ) + plot_file_path
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
         tool.main(args1.split())
         output = fakeStdout.getvalue().strip()
         assert output, "audio_offset_finder did not produce any output"
@@ -81,12 +85,12 @@ def test_tool():
 
 def test_json():
     import json
-    args = ("--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
-            "--trim 35 --json")
-    with patch('sys.stdout', new=StringIO()) as fakeStdout:
+
+    args = "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 " "--trim 35 --json"
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
         tool.main(args.split())
         output = fakeStdout.getvalue().strip()
         json_array = json.loads(output)
         assert len(json_array) == 2
         assert pytest.approx(json_array["time_offset"]) == 12.26
-        assert json_array["standard_score"] > 10
+        assert pytest.approx(json_array["standard_score"], rel=1e-2) == 28.99
