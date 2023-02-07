@@ -31,6 +31,10 @@ jobs:
         if [ "$RUNNER_OS" == "macOS" ]; then
           brew install ffmpeg
         elif [ "$RUNNER_OS" == "Linux" ]; then
+          # apt-spy needed because of issues with the default APT repos for Workflow hosts - https://github.com/actions/runner-images/issues/675
+          sudo gem install apt-spy2
+          sudo apt-spy2 fix --commit --launchpad --country=US
+          sudo apt-get update
           sudo apt install -y ffmpeg
         fi
 
