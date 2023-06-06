@@ -147,7 +147,7 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     time_offset = (max_k_frame_offset) * time_scale
 
     if np.std(c) < 1e-10:
-        score = inf
+        score = np.inf
     else:
         score = (c[max_k_index] - np.mean(c)) / np.std(c)  # standard score of peak
     return {
