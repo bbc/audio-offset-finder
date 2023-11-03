@@ -1,8 +1,6 @@
-#!/usr/bin/python3
-
 # audio-offset-finder
 #
-# Copyright (c) 2014-22 British Broadcasting Corporation
+# Copyright (c) 2014-23 British Broadcasting Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from audio_offset_finder.audio_offset_finder import find_offset_between_files
+from .audio_offset_finder import find_offset_between_files
 import argparse
 import sys
 
@@ -117,5 +115,9 @@ def plot_results(args, results):
         pyplot.show()
 
 
-if __name__ == "__main__":
+def run():
     sys.exit(main(sys.argv[1:]))
+
+
+if __name__ == "__main__":
+    run()
