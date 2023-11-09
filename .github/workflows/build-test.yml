@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.8", "3.9"] # no 3.10 yet - see https://github.com/bbc/audio-offset-finder/issues/20
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
     - uses: actions/checkout@v3
@@ -31,6 +31,10 @@ jobs:
         if [ "$RUNNER_OS" == "macOS" ]; then
           brew install ffmpeg
         elif [ "$RUNNER_OS" == "Linux" ]; then
+          # apt-spy needed because of issues with the default APT repos for Workflow hosts - https://github.com/actions/runner-images/issues/675
+          sudo gem install apt-spy2
+          sudo apt-spy2 fix --commit --launchpad --country=US
+          sudo apt-get update
           sudo apt install -y ffmpeg
         fi
 
@@ -43,7 +47,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install pytest
-        if [ -f requirements.txt ]; then echo "requirements.txt"; cat requirements.txt; pip install -r requirements.txt; fi
+        pip install .
     - name: Lint with black
       uses: psf/black@stable
       with:
