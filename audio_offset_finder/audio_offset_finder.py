@@ -243,8 +243,9 @@ def convert_and_trim(afile, fs, trim):
             tmp_name,
         ],
         stderr=PIPE,
+        text=True,
     )
-    psox.communicate()
+    stdout, stderr = psox.communicate()
     if not psox.returncode == 0:
-        raise Exception("FFMpeg failed")
+        raise Exception("FFMpeg failed:\n" + stderr)
     return tmp_name
