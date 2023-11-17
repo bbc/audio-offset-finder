@@ -58,6 +58,11 @@ def test_find_offset_between_files():
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, max_frames=100)
     print((results["time_offset"], results["standard_score"]))
 
+    with pytest.raises(Exception) as exception:
+        find_offset_between_files(path("dummy.mp3"), path("timbl_2.mp3"), hop_length=160, trim=0.1)
+    assert exception.value.args[0].startswith("FFMpeg failed:\n")
+    assert exception.value.args[0].endswith("No such file or directory")
+
 
 def test_std_mfcc():
     m = np.array([[2, 3, 4], [4, 5, 5]])

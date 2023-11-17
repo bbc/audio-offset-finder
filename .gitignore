@@ -5,3 +5,4 @@ dist
 bin/
 lib/
 pyvenv.cfg
+.python-version
