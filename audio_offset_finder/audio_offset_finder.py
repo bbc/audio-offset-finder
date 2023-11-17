@@ -227,7 +227,7 @@ def convert_and_trim(afile, fs, trim):
         [
             "ffmpeg",
             "-loglevel",
-            "panic",
+            "error",
             "-i",
             afile,
             "-ac",
@@ -246,6 +246,6 @@ def convert_and_trim(afile, fs, trim):
         text=True,
     )
     stdout, stderr = psox.communicate()
-    if not psox.returncode == 0:
-        raise Exception("FFMpeg failed:\n" + stderr)
+    if psox.returncode != 0:
+        raise Exception("FFMpeg failed:\n" + stderr.strip())
     return tmp_name
