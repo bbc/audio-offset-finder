@@ -63,6 +63,7 @@ def test_find_offset_between_files():
     assert exception.value.args[0].startswith("FFMpeg failed:\n")
     assert exception.value.args[0].endswith("No such file or directory")
 
+
 def test_std_mfcc():
     m = np.array([[2, 3, 4], [4, 5, 5]])
     s1 = np.std([2, 4])
