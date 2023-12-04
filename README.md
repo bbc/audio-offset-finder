@@ -69,6 +69,11 @@ Testing
 
     $ pytest
 
+Copyright
+---------
+
+(c) 2014-2023 British Broadcasting Corporation and contributors
+
 Licensing terms and authorship
 ------------------------------
 
@@ -78,5 +83,5 @@ For details of how to contribute changes, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 The audio file used in the tests was downloaded from
 [Wikimedia Commons](http://en.wikipedia.org/wiki/File:Tim_Berners-Lee_-_Today_-_9_July_2008.flac),
-and was originally extracted from the 9 July 2008 
-episode of the BBC [Today programme](http://www.bbc.co.uk/programmes/b00cddwc).
+and was originally extracted from the 9 July 2008
+episode of the BBC [Today programme](https://www.bbc.co.uk/programmes/b00cddwc).
