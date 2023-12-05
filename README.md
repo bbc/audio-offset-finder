@@ -69,6 +69,15 @@ Testing
 
     $ pytest
 
+Similar Projects
+----------------
+
+If this tool doesn't meet your needs, there are others that you may wish to consider.  For example:
+* [AudAlign](https://github.com/benfmiller/audalign) is a Python package and command-line tool for processing and aligning audio files using a variety of techniques.  It may therefore offer additional options in circumstances where this tool fails.  
+* [AudioAlign](https://github.com/protyposis/AudioAlign) is a .NET GUI for the [Aurio](https://github.com/protyposis/Aurio) library.  It aims to solve the problem of synchronising audio and video recordings from the same event (or with the same audio tracks).
+
+The inclusion of a tool in this list does not constitute a recommendation regarding its use.  You should carry out your own checks regarding performance, security, legality, appropriateness etc.
+
 Copyright
 ---------
 
