@@ -7,7 +7,7 @@ The algorithm uses cross-correlation of standardised Mel-Frequency Cepstral Coef
 
 The tool outputs the calculated offset in seconds, and a ["standard score"](https://en.wikipedia.org/wiki/Standard_score) indicating the prominence of the chosen correlation peak.  This can be used as a very rough estimate of the accuracy of the calculated offset - one with a score greater than ten is likely to be correct (at least for audio without similar repeated sections) within the accuracy of the tool; an offset with a score less than five is unlikely to be correct, and a manual check should be carried out.  Note that the value of the score depends on the length of the audio analysed.
 
-The tool uses [FFmpeg](https://ffmpeg.org) for transcoding, so should work on all file formats supported by FFmpeg.  It is tested for compatibility with Python 3.8 and 3.9 on Linux, Windows and macOS.
+The tool uses [FFmpeg](https://ffmpeg.org) for transcoding, so should work on all file formats supported by FFmpeg.  It is tested for compatibility with all Python major versions from 3.8 through 3.12 on Linux, Windows and macOS.
 
 The aim of this open source project is to provide a simple tool and library that do one job well, and that can be the basis of customisation for more complex use cases.  The [forks of the base respository](https://github.com/bbc/audio-offset-finder/network/members) are worth exploring if you need a feature that is not included here.  The maintainers welcome pull requests with bug fixes, new features and other improvements that fit this philosophy - please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
@@ -81,7 +81,7 @@ The inclusion of a tool in this list does not constitute a recommendation regard
 Copyright
 ---------
 
-(c) 2014-2023 British Broadcasting Corporation and contributors
+©2014-2023 British Broadcasting Corporation and contributors
 
 Licensing terms and authorship
 ------------------------------

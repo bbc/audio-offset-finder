@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v3
@@ -45,7 +45,15 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python_version=${{ matrix.python-version }}
+        python_major_version=${python_version%%.*}
+        python_minor_version=${python_version#"$python_major_version."}
+
         python -m pip install --upgrade pip
+        if [ $python_major_version -gt 3 ] || [ $python_minor_version -ge 12 ]; then
+          echo "Installing setuptools since distutils has been removed from Python 3.12 onwards."
+          python -m pip install setuptools
+        fi
         python -m pip install pytest
         pip install .
     - name: Lint with black
