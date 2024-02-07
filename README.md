@@ -7,7 +7,7 @@ The algorithm uses cross-correlation of standardised Mel-Frequency Cepstral Coef
 
 The tool outputs the calculated offset in seconds, and a ["standard score"](https://en.wikipedia.org/wiki/Standard_score) indicating the prominence of the chosen correlation peak.  This can be used as a very rough estimate of the accuracy of the calculated offset - one with a score greater than ten is likely to be correct (at least for audio without similar repeated sections) within the accuracy of the tool; an offset with a score less than five is unlikely to be correct, and a manual check should be carried out.  Note that the value of the score depends on the length of the audio analysed.
 
-The tool uses [FFmpeg](https://ffmpeg.org) for transcoding, so should work on all file formats supported by FFmpeg.  It is tested for compatibility with Python 3.8 and 3.9 on Linux, Windows and macOS.
+The tool uses [FFmpeg](https://ffmpeg.org) for transcoding, so should work on all file formats supported by FFmpeg.  It is tested for compatibility with Python 3.8-3.12 on Linux, Windows and macOS.  Other Python versions and platforms may or may not work.
 
 The aim of this open source project is to provide a simple tool and library that do one job well, and that can be the basis of customisation for more complex use cases.  The [forks of the base respository](https://github.com/bbc/audio-offset-finder/network/members) are worth exploring if you need a feature that is not included here.  The maintainers welcome pull requests with bug fixes, new features and other improvements that fit this philosophy - please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
@@ -23,6 +23,13 @@ Or, to install the latest package from PyPi.org:
     $ pip install audio-offset-finder
 
 You will need to [install FFmpeg](https://ffmpeg.org/download.html) to use the command-line tool, or to use the file-related functions in the library.
+
+Troubleshooting
+---------------
+
+This project uses Python's `distutils` library as part of the package build process.  This has been [removed from the standard library in Python 3.12 onwards](https://docs.python.org/3/whatsnew/3.12.html).  If you get an error saying "ModuleNotFoundError: No module named 'pkg_resources'", try installing the `setuptools` library, which provides the missing function calls:
+
+    $ pip install setuptools
 
 Usage
 -----
