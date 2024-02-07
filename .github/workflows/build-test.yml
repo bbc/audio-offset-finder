@@ -48,10 +48,9 @@ jobs:
         python_version=${{ matrix.python-version }}
         python_major_version=${python_version%%.*}
         python_minor_version=${python_version#"$python_major_version."}
-        echo "Python version $python_major_version.$python_minor_version"
 
         python -m pip install --upgrade pip
-        if [ $python_major_version -gt 3 || $python_minor_version -ge 12 ]; then
+        if [ $python_major_version -gt 3 ] || [ $python_minor_version -ge 12 ]; then
           echo "Installing setuptools since distutils has been removed from Python 3.12 onwards."
           python -m pip install setuptools
         fi
