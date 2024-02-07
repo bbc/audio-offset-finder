@@ -45,8 +45,9 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python-major-version=${matrix.python-version%%.*}
-        python-minor-version=${matrix.python-version#"$python-major-version."}
+        python-version=${{ matrix.python-version }}
+        python-major-version=${python-version%%.*}
+        python-minor-version=${python-version#"$python-major-version."}
         echo "Python version $python-major-version.$python-minor-version"
 
         python -m pip install --upgrade pip
