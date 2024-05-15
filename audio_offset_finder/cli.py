@@ -51,9 +51,14 @@ def main(argv):
     args = parser.parse_args(argv)
     if not (args.find_offset_of and args.within):
         parser.error("Please provide input audio files")
-    results = find_offset_between_files(
-        args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution)
-    )
+
+    try:
+        results = find_offset_between_files(
+            args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution)
+        )
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return 1
 
     if args.output_json:
         import json
