@@ -16,14 +16,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install FFMPEG (Windows-only)
       if: ${{ matrix.os == 'windows-latest' }}
-      uses: FedericoCarboni/setup-ffmpeg@v1
+      uses: FedericoCarboni/setup-ffmpeg@v3
       id: setup-ffmpeg
 
     - name: Install FFMPEG (Non-Windows)
@@ -39,7 +39,7 @@ jobs:
         fi
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
