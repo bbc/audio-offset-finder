@@ -26,10 +26,10 @@ import tempfile
 
 def test_reorder_correlations():
     input_array1 = np.array([0, 1, 2, 3])
-    np.testing.assert_array_equal(reorder_correlations(input_array1), np.array([2, 3, 0, 1]))
+    np.testing.assert_array_equal(reorder_correlations(input_array1, 2), np.array([2, 3, 0, 1]))
 
     input_array2 = np.array([0, 1, 2, 3, 4])
-    np.testing.assert_array_equal(reorder_correlations(input_array2), np.array([2, 3, 4, 0, 1]))
+    np.testing.assert_array_equal(reorder_correlations(input_array2, 2), np.array([2, 3, 4, 0, 1]))
 
 
 def test_tool():
