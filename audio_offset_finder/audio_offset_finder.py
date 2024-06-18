@@ -161,7 +161,7 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     }
 
 
-# returns an array in which the first half represents an offset of mfcc2 within mfcc2,
+# returns an array in which the first half represents an offset of mfcc2 within mfcc1,
 # and the second half (accessed by negative indices) vice-versa.
 def cross_correlation(mfcc1, mfcc2, nframes):
     """Calculate the cross-correlation curve between two numpy arrays (assumed to be MFCCs).
@@ -186,8 +186,8 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     """
     n1, mdim1 = mfcc1.shape
     n2, mdim2 = mfcc2.shape
-    o_min = nframes - min(n1, n2)
-    o_max = min(n1, n2) - nframes + 1
+    o_min = nframes - n2
+    o_max = n1 - nframes + 1
     n = o_max - o_min
     c = np.zeros(n)
     for k in range(o_min, 0):
