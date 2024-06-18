@@ -73,13 +73,12 @@ def main(argv):
         plot_results(args, results)
 
 
-# Re-order the cross-correlation array so that the zero offset is in the middle
-def reorder_correlations(cc):
+# Re-order the cross-correlation array so that the index of the earliest frame offset is at one end of the range
+def reorder_correlations(cc, earliest_frame_offset):
     from numpy import concatenate
 
     num_elements = len(cc)
-    centre_index = int(num_elements / 2)
-    return concatenate((cc[centre_index:], cc[:centre_index]))
+    return concatenate((cc[earliest_frame_offset:], cc[:earliest_frame_offset]))
 
 
 def plot_results(args, results):
@@ -88,7 +87,7 @@ def plot_results(args, results):
 
     cc = results["correlation"]
     cc_length = len(cc)
-    plot_data = reorder_correlations(cc)
+    plot_data = reorder_correlations(cc, results["earliest_frame_offset"])
 
     pyplot.figure(figsize=(15, 5))
     xaxis_range = range(results["earliest_frame_offset"], results["latest_frame_offset"])

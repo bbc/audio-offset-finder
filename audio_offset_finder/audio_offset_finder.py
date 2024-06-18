@@ -179,9 +179,9 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     -------
     A numpy array containing the cross-correlation of the two arrays for each possible offset between them.
     The zeroth element contains the cross-correlation with no offset.
-    The first half of the array (up to len(c)/2) contains offsets of mfcc2 within mfcc1.
-    The second half of the array contains offsets of mfcc1 within mfcc2.
-    This is done so that accessing the array with an index in the range -(len(c)/2) to (len(c)/2) will return
+    The first part of the array (with negative indices) contains offsets of mfcc1 within mfcc2.
+    The second half of the array (with positive indices) contains offsets of mfcc2 within mfcc1.
+    This is done so that accessing the array with an index in the range o_min to o_max will return
     an appropriate cross-correlation coefficient for that offset.
     """
     n1, mdim1 = mfcc1.shape
