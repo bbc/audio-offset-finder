@@ -1,6 +1,6 @@
 # audio-offset-finder
 #
-# Copyright (c) 2014-22 British Broadcasting Corporation
+# Copyright (c) 2014-24 British Broadcasting Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,27 +30,27 @@ def test_find_offset_between_files():
     # timbl_2.mp3: File truncated at 12.254 seconds
     # timbl_3.mp3: File truncated at 12.223 seconds with white noise added to it
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=35)
-    assert pytest.approx(results["time_offset"]) == 12.26
-    assert pytest.approx(results["standard_score"], rel=1e-2) == 28.99
+    assert results["time_offset"] == pytest.approx(12.26)
+    assert results["standard_score"] == pytest.approx(28.99, rel=1e-2)
 
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_3.mp3"), hop_length=160, trim=35)
-    assert pytest.approx(results["time_offset"]) == 12.24
-    assert pytest.approx(results["standard_score"], rel=1e-2) == 23.49
+    assert results["time_offset"] == pytest.approx(12.24)
+    assert results["standard_score"] == pytest.approx(23.49, rel=1e-2)
 
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_1.mp3"), hop_length=160, trim=35)
-    assert pytest.approx(results["time_offset"]) == 0.0
-    assert pytest.approx(results["standard_score"], rel=1e-2) == 33.79
+    assert results["time_offset"] == pytest.approx(0.0)
+    assert results["standard_score"] == pytest.approx(33.79, rel=1e-2)
 
     results = find_offset_between_files(path("timbl_2.mp3"), path("timbl_2.mp3"), hop_length=160, trim=35)
-    assert pytest.approx(results["time_offset"]) == 0.0
-    assert pytest.approx(results["standard_score"], rel=1e-2) == 32.48
+    assert results["time_offset"] == pytest.approx(0.0)
+    assert results["standard_score"] == pytest.approx(32.48, rel=1e-2)
 
     results = find_offset_between_files(path("timbl_2.mp3"), path("timbl_1.mp3"), hop_length=160, trim=35)
-    assert pytest.approx(results["time_offset"]) == -12.26
-    assert pytest.approx(results["standard_score"], rel=1e-2) == 28.99
+    assert results["time_offset"] == pytest.approx(-12.26)
+    assert results["standard_score"] == pytest.approx(28.99, rel=1e-2)
 
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=1)
-    assert pytest.approx(results["standard_score"], rel=1e-2) == 2.60  # No good results["offset"] found
+    assert results["standard_score"] == pytest.approx(2.60, rel=1e-2)  # No good results["offset"] found
 
     with pytest.raises(InsufficientAudioException):
         find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=0.1)
