@@ -22,6 +22,8 @@ Or, to install the latest package from PyPi.org:
 
     $ pip install audio-offset-finder
 
+If you are installing on macOS and use the third-party package manager [HomeBrew](https://brew.sh), then [you may wish to use `pipx`](https://docs.brew.sh/Homebrew-and-Python) instead of `pip`.
+
 You will need to [install FFmpeg](https://ffmpeg.org/download.html) to use the command-line tool, or to use the file-related functions in the library.
 
 Usage
@@ -81,7 +83,7 @@ The inclusion of a tool in this list does not constitute a recommendation regard
 Copyright
 ---------
 
-(c) 2014-2023 British Broadcasting Corporation and contributors
+(c) 2014-2024 British Broadcasting Corporation and contributors
 
 Licensing terms and authorship
 ------------------------------
