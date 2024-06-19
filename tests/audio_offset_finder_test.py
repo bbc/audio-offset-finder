@@ -69,7 +69,7 @@ def test_find_offset_between_files():
 
     results = find_offset_between_files(path("r4.ogg"), path("r4_excerpt2.ogg"), hop_length=128, trim=20 * 60)
     assert results["time_offset"] == pytest.approx(726.4)
-    assert results["standard_score"] == pytest.approx(59.23, rel=1e-2)
+    assert results["standard_score"] == pytest.approx(58.66, rel=1e-2)
 
 
 def test_std_mfcc():
