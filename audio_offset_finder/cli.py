@@ -108,9 +108,6 @@ def plot_results(args, results):
     pyplot.title(plot_title, fontsize=14)
 
     peak_xvalue = results["frame_offset"]
-    if peak_xvalue > cc_length / 2:
-        peak_xvalue -= cc_length
-
     pyplot.axvline(x=peak_xvalue, color="red", linestyle="dotted")
 
     if args.plot_file is not None:
