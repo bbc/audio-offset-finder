@@ -92,7 +92,7 @@ See the [COPYING](COPYING) and [AUTHORS](AUTHORS) files.
 
 For details of how to contribute changes, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The audio file used in the tests was downloaded from
-[Wikimedia Commons](http://en.wikipedia.org/wiki/File:Tim_Berners-Lee_-_Today_-_9_July_2008.flac),
-and was originally extracted from the 9 July 2008
-episode of the BBC [Today programme](https://www.bbc.co.uk/programmes/b00cddwc).
+The audio files used in the tests were downloaded from
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page):
+* [A recording of Tim Berners-Lee](https://commons.wikimedia.org/wiki/File:Tim_Berners-Lee_-_Today_(ffmpeg_FLAC_in_OGG).oga), originally extracted from the 9 July 2008 episode of the BBC [Today programme](https://www.bbc.co.uk/programmes/b00cddwc).  This file is licensed under the [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons) [Attribution 3.0 Unported](https://creativecommons.org/licenses/by/3.0/deed.en) license
+* [A spoken word version of the Wikipedia article on BBC Radio 4](https://commons.wikimedia.org/wiki/File:BBC_Radio_4.ogg).  This file is licensed under the [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons) [Attribution-Share Alike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/deed.en) license, and hence the excerpts created for use in the tests are also covered by that license.
