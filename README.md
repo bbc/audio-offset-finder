@@ -26,8 +26,8 @@ If you are installing on macOS and use the third-party package manager [HomeBrew
 
 You will need to [install FFmpeg](https://ffmpeg.org/download.html) to use the command-line tool, or to use the file-related functions in the library.
 
-Usage
------
+Basic Usage
+-----------
 
 To use the command-line tool:
 
@@ -39,6 +39,27 @@ To use the command-line tool:
     $ audio-offset-finder --find-offset-of file2.wav --within file1.wav
     Offset: -12.26 (seconds)
     Standard score: 28.99
+
+Command-Line Options
+--------------------
+The following command-line options can be provided to alter the behaviour of the tool:
+
+| Option | Description |
+| ------ | ----------- |
+| -h, --help  |  show a help message and exit |
+| --find-offset-of audio file | Find the offset of this file... |
+| --within audio file  |  ...within this file |
+| --sr sample rate |  Target sample rate in Hz during downsampling (default: 8000) |
+| --trim seconds  |  Only use the first n seconds of each audio file |
+| --resolution samples  |  Resolution (maximum accuracy) of search in samples (default: 128) |
+| --show-plot  |  Display a plot of the cross-correlation results |
+| --save-plot filename |  Save a plot of the cross-correlation results to a file (in a format that matches the extension you provide - png, ps, pdf, svg) |
+| --json  |  Output in JSON for further processing |
+
+You can fine-tune the results for your application by tweaking the sample rate, trim and resolution parameters:
+* The _sample rate_ option refers to a resampling operation that is carried out before the audio offset search is carried out.  It does not refer to the sample rate(s) of the audio files being compared.  Resampling at a higher sample rate retains higher audio frequencies, but increases the time required to search for an offset.  The default sample rate is 8000Hz, which is a good compromise for most audio.
+* The audio search is carried out by comparing the two audio files at a given offset, then skipping forward by a certain number of samples and then comparing them again.  This is repeated for all valid positions of one file compared to another, and then the best match is chosen and presented to the user.  The size of the skip is the _resolution_ of the search.  At a sample rate of 8000Hz (the default, as described above), a resolution of 128 samples (also the default) corresponds to a skip size of 128 / 8000 = 0.016 seconds.  This sets a limit on the precision of the offsets calculated by the tool.  You can make the search more precise by decreasing the value of _resolution_, but at the cost of increasing the processing time.
+* An optional _trim_ operation can be carried out before processing.  If you specify a value here, only the given number of seconds from the beginning of each file will be searched for an offset.  This will prevent the tool from finding offsets unless they are somewhat less than the trim size.  It will also prevent the tool from finding offsets unless the similarities between the two audio files are present in the trimmed parts of the files.  If in doubt ensure that you select a trim size at least twice as large as the maximum possible offset, or leave it unspecified (the default) to search the whole range of each file.
 
 To provide additional information about the accuracy of the result in addition to the standard score, the `--show-plot` option shows a plot of the cross-correlation curve, and the `--save-plot` option saves one to a file.  The two options can be used separately, or together if you want to both view the plot and save a copy of it:
 
@@ -68,6 +89,7 @@ have in memory.
 
 Testing
 -------
+A number of automated unit tests are included (and run before any pull requests are accepted) to try and validate the basic functionality of the tool in different scenarios.  You can run them yourself by simply installing pytest and running it in this repository's root folder:
 
     $ pytest
 
@@ -95,4 +117,4 @@ For details of how to contribute changes, see [CONTRIBUTING.md](CONTRIBUTING.md)
 The audio files used in the tests were downloaded from
 [Wikimedia Commons](https://commons.wikimedia.org/wiki/Main_Page):
 * [A recording of Tim Berners-Lee](https://commons.wikimedia.org/wiki/File:Tim_Berners-Lee_-_Today_(ffmpeg_FLAC_in_OGG).oga), originally extracted from the 9 July 2008 episode of the BBC [Today programme](https://www.bbc.co.uk/programmes/b00cddwc).  This file is licensed under the [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons) [Attribution 3.0 Unported](https://creativecommons.org/licenses/by/3.0/deed.en) license
-* [A spoken word version of the Wikipedia article on BBC Radio 4](https://commons.wikimedia.org/wiki/File:BBC_Radio_4.ogg).  This file is licensed under the [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons) [Attribution-Share Alike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/deed.en) license, and hence the excerpts created for use in the tests are also covered by that license.
+* [A spoken word version](https://commons.wikimedia.org/wiki/File:BBC_Radio_4.ogg) of [the Wikipedia article on BBC Radio 4](https://en.wikipedia.org/wiki/BBC_Radio_4), spoken and recorded by Wikimedia Commons user [Tom Morris](https://commons.wikimedia.org/wiki/User:Tom_Morris).  This file is licensed under the [Creative Commons](https://en.wikipedia.org/wiki/en:Creative_Commons) [Attribution-Share Alike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/deed.en) license, and hence the excerpts created for use in the tests are also covered by that license.
