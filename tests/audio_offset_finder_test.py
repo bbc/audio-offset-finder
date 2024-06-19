@@ -52,6 +52,12 @@ def test_find_offset_between_files():
     results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=1)
     assert results["standard_score"] == pytest.approx(2.60, rel=1e-2)  # No good results["offset"] found
 
+    results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160)
+    assert results["time_offset"] == pytest.approx(12.26)
+    assert results["standard_score"] == pytest.approx(
+        30.09, rel=1e-2
+    )  # standard score increases with more audio in cross-correlation
+
     with pytest.raises(InsufficientAudioException):
         find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=0.1)
 

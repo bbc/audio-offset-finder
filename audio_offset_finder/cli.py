@@ -30,19 +30,17 @@ def main(argv):
         ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--find-offset-of", metavar="audio file", type=str, help="Find the offset of file")
-    parser.add_argument("--within", metavar="audio file", type=str, help="Within file")
-    parser.add_argument("--sr", metavar="sample rate", type=int, default=8000, help="Target sample rate during downsampling")
-    parser.add_argument(
-        "--trim", metavar="seconds", type=int, default=60 * 15, help="Only uses first n seconds of audio files"
-    )
+    parser.add_argument("--find-offset-of", metavar="audio file", type=str, help="Find the offset of this file...")
+    parser.add_argument("--within", metavar="audio file", type=str, help="...within this file.")
+    parser.add_argument("--sr", metavar="sample rate", type=int, default=8000, help="Resample to this rate before searching")
+    parser.add_argument("--trim", metavar="seconds", type=int, help="Only consider the first n seconds of the audio files")
     parser.add_argument(
         "--resolution", metavar="samples", type=int, default=128, help="Resolution (maximum accuracy) of search in samples"
     )
     parser.add_argument("--show-plot", action="store_true", dest="show_plot", help="Display plot of cross-correlation results")
     parser.add_argument(
         "--save-plot",
-        metavar="plot file",
+        metavar="filename",
         dest="plot_file",
         type=str,
         help=("Save a plot of cross-correlation results to a file " "(format matches extension - png, ps, pdf, svg)"),
@@ -53,8 +51,12 @@ def main(argv):
         parser.error("Please provide input audio files")
 
     try:
+        trim = None
+        if args.trim:
+            trim = int(args.trim)
+
         results = find_offset_between_files(
-            args.within, args.find_offset_of, fs=int(args.sr), trim=int(args.trim), hop_length=int(args.resolution)
+            args.within, args.find_offset_of, fs=int(args.sr), trim=trim, hop_length=int(args.resolution)
         )
     except Exception as e:
         print(e, file=sys.stderr)
