@@ -139,9 +139,12 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
         )
 
     c, earliest_frame_offset, latest_frame_offset = cross_correlation(mfcc1, mfcc2, nframes=correl_nframes)
+
+    # Find the largest value in the array of cross-correlation results (the most likely offset between the buffers)
+    # and then convert it into a time offset (see also the documentation for the cross_correlation() function)
     max_k_index = np.argmax(c)
     max_k_frame_offset = max_k_index
-    if max_k_index > len(c) / 2:
+    if max_k_frame_offset > latest_frame_offset:
         max_k_frame_offset -= len(c)
     time_scale = hop_length / fs
     time_offset = (max_k_frame_offset) * time_scale
@@ -152,7 +155,7 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
         score = (c[max_k_index] - np.mean(c)) / np.std(c)  # standard score of peak
     return {
         "time_offset": time_offset,
-        "frame_offset": int(max_k_index),
+        "frame_offset": int(max_k_frame_offset),
         "standard_score": score,
         "correlation": c,
         "time_scale": time_scale,
@@ -180,9 +183,11 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     A numpy array containing the cross-correlation of the two arrays for each possible offset between them.
     The zeroth element contains the cross-correlation with no offset.
     The first part of the array (with negative indices) contains offsets of mfcc1 within mfcc2.
-    The second half of the array (with positive indices) contains offsets of mfcc2 within mfcc1.
+    The second part of the array (with positive indices) contains offsets of mfcc2 within mfcc1.
     This is done so that accessing the array with an index in the range o_min to o_max will return
     an appropriate cross-correlation coefficient for that offset.
+    However, it means that an array index cannot simply be translated into a time offset by multiplying
+    it by the hop size divided by the sample rate.  First, the distance from the start of the array
     """
     n1, mdim1 = mfcc1.shape
     n2, mdim2 = mfcc2.shape

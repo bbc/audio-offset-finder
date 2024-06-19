@@ -63,6 +63,14 @@ def test_find_offset_between_files():
     assert exception.value.args[0].startswith("FFMpeg failed:\n")
     assert exception.value.args[0].endswith("No such file or directory")
 
+    results = find_offset_between_files(path("r4.ogg"), path("r4_excerpt.ogg"), hop_length=128, trim=20 * 60)
+    assert results["time_offset"] == pytest.approx(334.608)
+    assert results["standard_score"] == pytest.approx(43.37, rel=1e-2)
+
+    results = find_offset_between_files(path("r4.ogg"), path("r4_excerpt2.ogg"), hop_length=128, trim=20 * 60)
+    assert results["time_offset"] == pytest.approx(726.4)
+    assert results["standard_score"] == pytest.approx(58.66, rel=1e-2)
+
 
 def test_std_mfcc():
     m = np.array([[2, 3, 4], [4, 5, 5]])
