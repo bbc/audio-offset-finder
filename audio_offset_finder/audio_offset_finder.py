@@ -38,7 +38,7 @@ def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     ]
 
 
-def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=128, win_length=256, nfft=512, max_frames=2000):
+def find_offset_between_files(file1, file2, fs=8000, trim=None, hop_length=128, win_length=256, nfft=512, max_frames=2000):
     """Find the offset time offset between two audio files.
 
     This function takes in two file paths, and (assuming they are media files with a valid audio track)
@@ -54,7 +54,7 @@ def find_offset_between_files(file1, file2, fs=8000, trim=60 * 15, hop_length=12
     fs: int
         The sampling rate that the audio should be resampled to prior to MFCC calculation, in Hz
     trim: int
-        The length to which input files will be truncated before processing, in seconds
+        The length to which input files will be truncated before processing, in seconds.  A value of "None" indicates no trimming.
     hop_length: int
         The number of samples (at the resampled rate "fs") to skip between each calculated MFCC frame
     win_length: int
@@ -209,7 +209,7 @@ def std_mfcc(array):
     return (array - np.mean(array, axis=0)) / np.std(array, axis=0)
 
 
-def convert_and_trim(afile, fs, trim):
+def convert_and_trim(afile, fs, trim=None):
     """Converts the input media to a temporary 16-bit WAV file and trims it to length.
 
     Parameters
@@ -220,6 +220,7 @@ def convert_and_trim(afile, fs, trim):
         The sample rate that the audio should be converted to during the conversion
     trim: float
         The length to which the output audio should be trimmed, in seconds.  (Audio beyond this point will be discarded.)
+        A value of "None" implies no trimming.
 
     Returns
     -------
@@ -228,28 +229,20 @@ def convert_and_trim(afile, fs, trim):
     tmp = tempfile.NamedTemporaryFile(mode="r+b", prefix="offset_", suffix=".wav")
     tmp_name = tmp.name
     tmp.close()
-    psox = Popen(
-        [
-            "ffmpeg",
-            "-loglevel",
-            "error",
-            "-i",
-            afile,
-            "-ac",
-            "1",
-            "-ar",
-            str(fs),
-            "-ss",
-            "0",
-            "-t",
-            str(trim),
-            "-acodec",
-            "pcm_s16le",
-            tmp_name,
-        ],
-        stderr=PIPE,
-        text=True,
-    )
+
+    ffmpeg_command = ["ffmpeg"]
+    ffmpeg_command += ["-loglevel", "error"]
+    ffmpeg_command += ["-i", afile]
+    ffmpeg_command += ["-ac", "1"]
+    ffmpeg_command += ["-ar", str(fs)]
+    ffmpeg_command += ["-ss", "0"]
+    if trim:
+        ffmpeg_command += ["-t", str(trim)]
+    ffmpeg_command += ["-acodec", "pcm_s16le"]
+    ffmpeg_command += [tmp_name]
+
+    psox = Popen(ffmpeg_command, stderr=PIPE, text=True)
+
     stdout, stderr = psox.communicate()
     if psox.returncode != 0:
         raise Exception("FFMpeg failed:\n" + stderr.strip())
