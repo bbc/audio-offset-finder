@@ -46,7 +46,7 @@ The following command-line options can be provided to alter the behaviour of the
 
 | Option | Description |
 | ------ | ----------- |
-| -h, --help  |  show a help message and exit |
+| -h, --help  |  Show a help message and exit |
 | --find-offset-of audio file | Find the offset of this file... |
 | --within audio file  |  ...within this file |
 | --sr sample rate |  Target sample rate in Hz during downsampling (default: 8000) |
