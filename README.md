@@ -105,7 +105,7 @@ The inclusion of a tool in this list does not constitute a recommendation regard
 Copyright
 ---------
 
-(c) 2014-2024 British Broadcasting Corporation and contributors
+(c) 2014-2026 British Broadcasting Corporation and contributors
 
 Licensing terms and authorship
 ------------------------------
