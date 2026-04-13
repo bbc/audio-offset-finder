@@ -1,5 +1,5 @@
 librosa==0.10.2
 matplotlib==3.7.3
 numpy==1.22.3
-pytest==6.2.5
+pytest==9.0.3
 scipy==1.10.0
