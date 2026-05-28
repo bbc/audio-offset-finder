@@ -16,7 +16,7 @@
 
 import pytest
 from audio_offset_finder.audio_offset_finder import find_offset_between_files, std_mfcc, cross_correlation
-from audio_offset_finder.audio_offset_finder import InsufficientAudioException
+from audio_offset_finder.audio_offset_finder import InsufficientAudioException, find_peaks_in_correlation
 import numpy as np
 import os
 
@@ -84,6 +84,32 @@ def test_std_mfcc():
     s2 = np.std([3, 5])
     s3 = np.std([4, 5])
     np.testing.assert_array_equal(std_mfcc(m), np.array([[-1.0 / s1, -1.0 / s2, -0.5 / s3], [1.0 / s1, 1.0 / s2, 0.5 / s3]]))
+
+
+def test_find_peaks_in_correlation():
+    results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=35)
+
+    # A very high threshold returns just the dominant peak
+    peaks = find_peaks_in_correlation(results, threshold=20.0)
+    assert len(peaks) >= 1
+    assert peaks[0]["time_offset"] == pytest.approx(12.26)
+    assert peaks[0]["standard_score"] == pytest.approx(28.99, rel=1e-2)
+    # Sorted by standard_score descending
+    for i in range(len(peaks) - 1):
+        assert peaks[i]["standard_score"] >= peaks[i + 1]["standard_score"]
+    # Above the threshold
+    for p in peaks:
+        assert p["standard_score"] >= 20.0
+
+    # A lower threshold returns more peaks
+    more_peaks = find_peaks_in_correlation(results, threshold=5.0)
+    assert len(more_peaks) >= len(peaks)
+    for p in more_peaks:
+        assert p["standard_score"] >= 5.0
+
+    # An impossibly-high threshold returns nothing
+    none_peaks = find_peaks_in_correlation(results, threshold=1000.0)
+    assert none_peaks == []
 
 
 def test_cross_correlation():

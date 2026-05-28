@@ -16,6 +16,7 @@
 
 from subprocess import Popen, PIPE
 from scipy.io import wavfile
+from scipy.signal import find_peaks
 import librosa
 import os
 import tempfile
@@ -162,6 +163,50 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
         "earliest_frame_offset": int(earliest_frame_offset),
         "latest_frame_offset": int(latest_frame_offset),
     }
+
+
+def find_peaks_in_correlation(results, threshold):
+    """Find all local maxima in a cross-correlation curve with a standard score above the given threshold.
+
+    Parameters
+    ----------
+    results: dict
+        A results dictionary as returned by find_offset_between_files() or find_offset_between_buffers().
+    threshold: float
+        The minimum standard score that a peak must have to be returned.
+
+    Returns
+    -------
+    A list of dicts, sorted by standard_score in descending order.  Each dict contains:
+    time_offset (float), frame_offset (int), standard_score (float)
+    """
+    c = results["correlation"]
+    time_scale = results["time_scale"]
+    latest_frame_offset = results["latest_frame_offset"]
+
+    mean = np.mean(c)
+    std = np.std(c)
+    if std < 1e-10:
+        return []
+
+    height = mean + threshold * std
+    peak_indices, _ = find_peaks(c, height=height)
+
+    peaks = []
+    for idx in peak_indices:
+        frame_offset = int(idx)
+        if frame_offset > latest_frame_offset:
+            frame_offset -= len(c)
+        score = float((c[idx] - mean) / std)
+        peaks.append(
+            {
+                "time_offset": frame_offset * time_scale,
+                "frame_offset": frame_offset,
+                "standard_score": score,
+            }
+        )
+    peaks.sort(key=lambda p: p["standard_score"], reverse=True)
+    return peaks
 
 
 # returns an array in which the first half represents an offset of mfcc2 within mfcc1,

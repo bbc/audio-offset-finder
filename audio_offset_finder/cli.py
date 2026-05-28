@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .audio_offset_finder import find_offset_between_files
+from .audio_offset_finder import find_offset_between_files, find_peaks_in_correlation
 import argparse
 import sys
 
@@ -46,6 +46,16 @@ def main(argv):
         help=("Save a plot of cross-correlation results to a file " "(format matches extension - png, ps, pdf, svg)"),
     )
     parser.add_argument("--json", action="store_true", dest="output_json", help="Output in JSON for further processing")
+    parser.add_argument(
+        "--multiple-threshold",
+        metavar="score",
+        type=float,
+        dest="multiple_threshold",
+        help=(
+            "Instead of returning the single best peak, return all peaks with a standard score above this threshold. "
+            "JSON output becomes an array of objects; plain output lists each peak."
+        ),
+    )
     args = parser.parse_args(argv)
     if not (args.find_offset_of and args.within):
         parser.error("Please provide input audio files")
@@ -62,17 +72,29 @@ def main(argv):
         print(e, file=sys.stderr)
         return 1
 
+    peaks = None
+    if args.multiple_threshold is not None:
+        peaks = find_peaks_in_correlation(results, args.multiple_threshold)
+
     if args.output_json:
         import json
 
-        json_results = {"time_offset": results["time_offset"], "standard_score": results["standard_score"]}
+        if peaks is not None:
+            json_results = [{"time_offset": p["time_offset"], "standard_score": p["standard_score"]} for p in peaks]
+        else:
+            json_results = {"time_offset": results["time_offset"], "standard_score": results["standard_score"]}
         print(json.dumps(json_results))
     else:
-        print("Offset: %s (seconds)" % str(results["time_offset"]))
-        print("Standard score: %s" % str(results["standard_score"]))
+        if peaks is not None:
+            print("Found %d peak(s) with standard score >= %s:" % (len(peaks), str(args.multiple_threshold)))
+            for p in peaks:
+                print("  Offset: %s (seconds), Standard score: %s" % (str(p["time_offset"]), str(p["standard_score"])))
+        else:
+            print("Offset: %s (seconds)" % str(results["time_offset"]))
+            print("Standard score: %s" % str(results["standard_score"]))
 
     if args.show_plot or args.plot_file is not None:
-        plot_results(args, results)
+        plot_results(args, results, peaks=peaks)
 
 
 # Re-order the cross-correlation array so that the index of the earliest frame offset is at one end of the range
@@ -83,7 +105,7 @@ def reorder_correlations(cc, earliest_frame_offset):
     return concatenate((cc[earliest_frame_offset:], cc[:earliest_frame_offset]))
 
 
-def plot_results(args, results):
+def plot_results(args, results, peaks=None):
     import matplotlib.pyplot as pyplot
     import matplotlib.ticker as ticker
 
@@ -109,8 +131,12 @@ def plot_results(args, results):
     plot_title = "Offset of %s in %s" % (args.find_offset_of, args.within)
     pyplot.title(plot_title, fontsize=14)
 
-    peak_xvalue = results["frame_offset"]
-    pyplot.axvline(x=peak_xvalue, color="red", linestyle="dotted")
+    if peaks is not None:
+        for p in peaks:
+            pyplot.axvline(x=p["frame_offset"], color="red", linestyle="dotted")
+    else:
+        peak_xvalue = results["frame_offset"]
+        pyplot.axvline(x=peak_xvalue, color="red", linestyle="dotted")
 
     if args.plot_file is not None:
         pyplot.savefig(args.plot_file)
