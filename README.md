@@ -51,10 +51,12 @@ The following command-line options can be provided to alter the behaviour of the
 | --within audio file  |  ...within this file |
 | --sr sample rate |  Target sample rate in Hz during downsampling (default: 8000) |
 | --trim seconds  |  Only use the first n seconds of each audio file |
+| --start seconds  |  Skip the first n seconds of each audio file before processing.  Combined with `--trim`, the audio considered is the window `[start, start + trim]`. Default: 0. |
 | --resolution samples  |  Resolution (maximum accuracy) of search in samples (default: 128) |
 | --show-plot  |  Display a plot of the cross-correlation results |
 | --save-plot filename |  Save a plot of the cross-correlation results to a file (in a format that matches the extension you provide - png, ps, pdf, svg) |
 | --json  |  Output in JSON for further processing |
+| --multiple-threshold score  |  Return all correlation peaks with a standard score above this threshold (instead of just the single best peak).  JSON output becomes an array of `{time_offset, standard_score}` objects, sorted by score descending. |
 
 You can fine-tune the results for your application by tweaking the sample rate, trim and resolution parameters:
 * The _sample rate_ option refers to a resampling operation that is carried out before the audio offset search is carried out.  It does not refer to the sample rate(s) of the audio files being compared.  Resampling at a higher sample rate retains higher audio frequencies, but increases the time required to search for an offset.  The default sample rate is 8000Hz, which is a good compromise for most audio.

@@ -71,3 +71,53 @@ def test_json():
         assert len(json_array) == 2
         assert pytest.approx(json_array["time_offset"]) == 12.26
         assert pytest.approx(json_array["standard_score"], rel=1e-2) == 28.99
+
+
+def test_multiple_threshold_json():
+    import json
+
+    args = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+        "--trim 35 --json --multiple-threshold 20.0"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        peaks = json.loads(output)
+        assert isinstance(peaks, list)
+        assert len(peaks) >= 1
+        # First peak is the dominant one
+        assert pytest.approx(peaks[0]["time_offset"]) == 12.26
+        assert pytest.approx(peaks[0]["standard_score"], rel=1e-2) == 28.99
+        for p in peaks:
+            assert "time_offset" in p
+            assert "standard_score" in p
+            assert p["standard_score"] >= 20.0
+
+
+def test_start():
+    import json
+
+    args = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+        "--trim 25 --start 5 --json"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        result = json.loads(output)
+        assert pytest.approx(result["time_offset"]) == 12.26
+
+
+def test_multiple_threshold_plain():
+    args = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+        "--trim 35 --multiple-threshold 20.0"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        assert "peak" in output.lower()
+        assert "12.26" in output
+        assert "Offset:" in output
+        assert "Standard score:" in output
