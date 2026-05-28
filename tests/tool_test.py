@@ -71,3 +71,17 @@ def test_json():
         assert len(json_array) == 2
         assert pytest.approx(json_array["time_offset"]) == 12.26
         assert pytest.approx(json_array["standard_score"], rel=1e-2) == 28.99
+
+
+def test_start():
+    import json
+
+    args = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+        "--trim 25 --start 5 --json"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        result = json.loads(output)
+        assert pytest.approx(result["time_offset"]) == 12.26

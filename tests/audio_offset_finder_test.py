@@ -86,6 +86,18 @@ def test_std_mfcc():
     np.testing.assert_array_equal(std_mfcc(m), np.array([[-1.0 / s1, -1.0 / s2, -0.5 / s3], [1.0 / s1, 1.0 / s2, 0.5 / s3]]))
 
 
+def test_find_offset_with_start():
+    # Skipping the first N seconds identically in both files preserves the relative offset.
+    results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_2.mp3"), hop_length=160, trim=25, start=5)
+    assert results["time_offset"] == pytest.approx(12.26)
+    assert results["standard_score"] > 10
+
+    # Auto-correlation with a non-zero start still finds offset 0.
+    results = find_offset_between_files(path("timbl_1.mp3"), path("timbl_1.mp3"), hop_length=160, trim=20, start=10)
+    assert results["time_offset"] == pytest.approx(0.0)
+    assert results["standard_score"] > 10
+
+
 def test_cross_correlation():
     m1 = np.array([[-0.5, -0.4, -0.4], [0.5, 0.5, 0.4], [0.1, -0.1, 0.1]])
     m2 = np.array([[0.5, 0.5, 0.4], [0.1, -0.1, 0.1], [-0.6, 0.0, -0.3]])
