@@ -85,3 +85,19 @@ def test_start():
         output = fakeStdout.getvalue().strip()
         result = json.loads(output)
         assert pytest.approx(result["time_offset"]) == 12.26
+
+
+def test_per_file_trim_and_start():
+    import json
+
+    # --start-within shifts only the --within file; the reported offset shifts accordingly.
+    args = (
+        "--find-offset-of tests/audio/r4_excerpt.ogg --within tests/audio/r4.ogg "
+        "--resolution 128 --start-within 320 --trim-within 60 --json"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        result = json.loads(output)
+        # 334.608 - 320 = 14.608s
+        assert pytest.approx(result["time_offset"]) == 14.608

@@ -35,11 +35,39 @@ def main(argv):
     parser.add_argument("--sr", metavar="sample rate", type=int, default=8000, help="Resample to this rate before searching")
     parser.add_argument("--trim", metavar="seconds", type=int, help="Only consider the first n seconds of the audio files")
     parser.add_argument(
+        "--trim-of",
+        metavar="seconds",
+        type=int,
+        dest="trim_of",
+        help="Override --trim for the --find-offset-of file only.",
+    )
+    parser.add_argument(
+        "--trim-within",
+        metavar="seconds",
+        type=int,
+        dest="trim_within",
+        help="Override --trim for the --within file only.",
+    )
+    parser.add_argument(
         "--start",
         metavar="seconds",
         type=float,
         default=0,
         help="Skip the first n seconds of each audio file before processing. Combined with --trim, considers the window [start, start+trim].",
+    )
+    parser.add_argument(
+        "--start-of",
+        metavar="seconds",
+        type=float,
+        dest="start_of",
+        help="Override --start for the --find-offset-of file only.",
+    )
+    parser.add_argument(
+        "--start-within",
+        metavar="seconds",
+        type=float,
+        dest="start_within",
+        help="Override --start for the --within file only.",
     )
     parser.add_argument(
         "--resolution", metavar="samples", type=int, default=128, help="Resolution (maximum accuracy) of search in samples"
@@ -62,12 +90,17 @@ def main(argv):
         if args.trim:
             trim = int(args.trim)
 
+        # file1 = --within, file2 = --find-offset-of
         results = find_offset_between_files(
             args.within,
             args.find_offset_of,
             fs=int(args.sr),
             trim=trim,
             start=args.start,
+            trim1=args.trim_within,
+            trim2=args.trim_of,
+            start1=args.start_within,
+            start2=args.start_of,
             hop_length=int(args.resolution),
         )
     except Exception as e:

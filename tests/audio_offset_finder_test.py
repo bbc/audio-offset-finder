@@ -98,6 +98,34 @@ def test_find_offset_with_start():
     assert results["standard_score"] > 10
 
 
+def test_find_offset_with_per_file_trim_and_start():
+    # r4_excerpt.ogg (4.38s) matches r4.ogg at offset 334.608s.
+    # Trim r4 (file1) tightly around the match while leaving the excerpt (file2) alone.
+    results = find_offset_between_files(
+        path("r4.ogg"),
+        path("r4_excerpt.ogg"),
+        hop_length=128,
+        trim1=60,
+        start1=320,
+    )
+    # After skipping 320s of r4, the excerpt now sits at 334.608 - 320 = 14.608s
+    assert results["time_offset"] == pytest.approx(14.608)
+    assert results["standard_score"] > 10
+
+    # Per-file overrides take precedence over the shared --trim/--start values.
+    results = find_offset_between_files(
+        path("r4.ogg"),
+        path("r4_excerpt.ogg"),
+        hop_length=128,
+        trim=20 * 60,  # would apply to both, but trim2 leaves the excerpt full-length anyway
+        start=0,
+        start1=300,
+        trim1=60,
+    )
+    assert results["time_offset"] == pytest.approx(34.608)
+    assert results["standard_score"] > 10
+
+
 def test_cross_correlation():
     m1 = np.array([[-0.5, -0.4, -0.4], [0.5, 0.5, 0.4], [0.1, -0.1, 0.1]])
     m2 = np.array([[0.5, 0.5, 0.4], [0.1, -0.1, 0.1], [-0.6, 0.0, -0.3]])
