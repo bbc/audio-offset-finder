@@ -38,7 +38,21 @@ def mfcc(audio, win_length=256, nfft=512, fs=16000, hop_length=128, numcep=13):
     ]
 
 
-def find_offset_between_files(file1, file2, fs=8000, trim=None, hop_length=128, win_length=256, nfft=512, max_frames=2000):
+def find_offset_between_files(
+    file1,
+    file2,
+    fs=8000,
+    trim=None,
+    start=0,
+    hop_length=128,
+    win_length=256,
+    nfft=512,
+    max_frames=2000,
+    trim1=None,
+    trim2=None,
+    start1=None,
+    start2=None,
+):
     """Find the offset time offset between two audio files.
 
     This function takes in two file paths, and (assuming they are media files with a valid audio track)
@@ -55,6 +69,15 @@ def find_offset_between_files(file1, file2, fs=8000, trim=None, hop_length=128, 
         The sampling rate that the audio should be resampled to prior to MFCC calculation, in Hz
     trim: int
         The length to which input files will be truncated before processing, in seconds.  A value of "None" indicates no trimming.
+        Used for both files unless overridden by trim1/trim2.
+    start: float
+        The number of seconds to skip at the beginning of each input file before processing.  Defaults to 0.
+        When combined with "trim", the audio considered is the window [start, start + trim].
+        Used for both files unless overridden by start1/start2.
+    trim1, trim2: int
+        Per-file overrides for "trim", applied to file1 and file2 respectively.  When set, take precedence over "trim".
+    start1, start2: float
+        Per-file overrides for "start", applied to file1 and file2 respectively.  When set, take precedence over "start".
     hop_length: int
         The number of samples (at the resampled rate "fs") to skip between each calculated MFCC frame
     win_length: int
@@ -65,9 +88,11 @@ def find_offset_between_files(file1, file2, fs=8000, trim=None, hop_length=128, 
     Returns
     -------
     A dict containing the following:
-    time_offset (float): the most likely offset of file2 compared to file1, in seconds.  A positive value indicates that
-                         file2 starts after file1
-    frame_offset (int): the offset of file2 compared to file1, measured in MFCC frames
+    time_offset (float): the most likely offset of file2 compared to file1, in seconds, expressed in the
+                         coordinates of the *original* (un-trimmed) input files.  A positive value indicates that
+                         file2 starts after file1.
+    frame_offset (int): the offset of file2 compared to file1, measured in MFCC frames over the trimmed buffers
+    time_offset_shift (float): start1 - start2, the amount added to the trim-relative offset to produce time_offset
     standard_score (float): the standard score of the highest correlation coefficient in the cross-correlation curve
     correlation (numpy int array): the 1D array of correlation coefficients calculated for the two input files
     time_scale: the scalar factor that is multiplied to frame offsets to convert them to time offsets
@@ -78,13 +103,22 @@ def find_offset_between_files(file1, file2, fs=8000, trim=None, hop_length=128, 
     ------
     InsufficientAudioException if the audio supplied is too short to analyse.
     """
-    tmp1 = convert_and_trim(file1, fs, trim)
-    tmp2 = convert_and_trim(file2, fs, trim)
+    trim1 = trim if trim1 is None else trim1
+    trim2 = trim if trim2 is None else trim2
+    start1 = start if start1 is None else start1
+    start2 = start if start2 is None else start2
+    tmp1 = convert_and_trim(file1, fs, trim1, start=start1)
+    tmp2 = convert_and_trim(file2, fs, trim2, start=start2)
     a1 = wavfile.read(tmp1, mmap=True)[1].astype(float)
     a2 = wavfile.read(tmp2, mmap=True)[1].astype(float)
     offset_dict = find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
     os.remove(tmp1)
     os.remove(tmp2)
+    # Convert the trim-relative time_offset back into original-file coordinates so that the
+    # reported value tells the user where file2 sits within the *original* file1.
+    time_offset_shift = start1 - start2
+    offset_dict["time_offset"] += time_offset_shift
+    offset_dict["time_offset_shift"] = time_offset_shift
     return offset_dict
 
 
@@ -209,7 +243,7 @@ def std_mfcc(array):
     return (array - np.mean(array, axis=0)) / np.std(array, axis=0)
 
 
-def convert_and_trim(afile, fs, trim=None):
+def convert_and_trim(afile, fs, trim=None, start=0):
     """Converts the input media to a temporary 16-bit WAV file and trims it to length.
 
     Parameters
@@ -221,6 +255,9 @@ def convert_and_trim(afile, fs, trim=None):
     trim: float
         The length to which the output audio should be trimmed, in seconds.  (Audio beyond this point will be discarded.)
         A value of "None" implies no trimming.
+    start: float
+        The number of seconds to skip at the beginning of the audio.  Audio before this point will be discarded.
+        Defaults to 0.
 
     Returns
     -------
@@ -235,7 +272,7 @@ def convert_and_trim(afile, fs, trim=None):
     ffmpeg_command += ["-i", afile]
     ffmpeg_command += ["-ac", "1"]
     ffmpeg_command += ["-ar", str(fs)]
-    ffmpeg_command += ["-ss", "0"]
+    ffmpeg_command += ["-ss", str(start)]
     if trim:
         ffmpeg_command += ["-t", str(trim)]
     ffmpeg_command += ["-acodec", "pcm_s16le"]

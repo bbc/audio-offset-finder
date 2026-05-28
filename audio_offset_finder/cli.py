@@ -35,6 +35,41 @@ def main(argv):
     parser.add_argument("--sr", metavar="sample rate", type=int, default=8000, help="Resample to this rate before searching")
     parser.add_argument("--trim", metavar="seconds", type=int, help="Only consider the first n seconds of the audio files")
     parser.add_argument(
+        "--trim-of",
+        metavar="seconds",
+        type=int,
+        dest="trim_of",
+        help="Override --trim for the --find-offset-of file only.",
+    )
+    parser.add_argument(
+        "--trim-within",
+        metavar="seconds",
+        type=int,
+        dest="trim_within",
+        help="Override --trim for the --within file only.",
+    )
+    parser.add_argument(
+        "--start",
+        metavar="seconds",
+        type=float,
+        default=0,
+        help="Skip the first n seconds of each audio file before processing. Combined with --trim, considers the window [start, start+trim].",
+    )
+    parser.add_argument(
+        "--start-of",
+        metavar="seconds",
+        type=float,
+        dest="start_of",
+        help="Override --start for the --find-offset-of file only.",
+    )
+    parser.add_argument(
+        "--start-within",
+        metavar="seconds",
+        type=float,
+        dest="start_within",
+        help="Override --start for the --within file only.",
+    )
+    parser.add_argument(
         "--resolution", metavar="samples", type=int, default=128, help="Resolution (maximum accuracy) of search in samples"
     )
     parser.add_argument("--show-plot", action="store_true", dest="show_plot", help="Display plot of cross-correlation results")
@@ -55,8 +90,18 @@ def main(argv):
         if args.trim:
             trim = int(args.trim)
 
+        # file1 = --within, file2 = --find-offset-of
         results = find_offset_between_files(
-            args.within, args.find_offset_of, fs=int(args.sr), trim=trim, hop_length=int(args.resolution)
+            args.within,
+            args.find_offset_of,
+            fs=int(args.sr),
+            trim=trim,
+            start=args.start,
+            trim1=args.trim_within,
+            trim2=args.trim_of,
+            start1=args.start_within,
+            start2=args.start_of,
+            hop_length=int(args.resolution),
         )
     except Exception as e:
         print(e, file=sys.stderr)
@@ -96,9 +141,11 @@ def plot_results(args, results):
     pyplot.plot(xaxis_range, plot_data)
 
     ax = pyplot.gca()
-    # Scale x values from frame numbers to time: t = mx + c, but c=0 for a symetrical cross-correlation
+    # Scale x values from frame numbers to time: t = mx + c, where c is the shift introduced by
+    # asymmetric per-file trimming (start1 - start2; zero when both files share the same start).
     m = results["time_scale"]
-    ticks_x = ticker.FuncFormatter(lambda x, pos: "{0:g}".format(x * m))
+    c = results.get("time_offset_shift", 0)
+    ticks_x = ticker.FuncFormatter(lambda x, pos: "{0:g}".format(x * m + c))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins="auto"))
     ax.xaxis.set_major_formatter(ticks_x)
     ax.set_xlabel("Time offset /s", fontsize="12")
