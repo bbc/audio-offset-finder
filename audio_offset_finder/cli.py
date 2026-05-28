@@ -141,9 +141,11 @@ def plot_results(args, results):
     pyplot.plot(xaxis_range, plot_data)
 
     ax = pyplot.gca()
-    # Scale x values from frame numbers to time: t = mx + c, but c=0 for a symetrical cross-correlation
+    # Scale x values from frame numbers to time: t = mx + c, where c is the shift introduced by
+    # asymmetric per-file trimming (start1 - start2; zero when both files share the same start).
     m = results["time_scale"]
-    ticks_x = ticker.FuncFormatter(lambda x, pos: "{0:g}".format(x * m))
+    c = results.get("time_offset_shift", 0)
+    ticks_x = ticker.FuncFormatter(lambda x, pos: "{0:g}".format(x * m + c))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins="auto"))
     ax.xaxis.set_major_formatter(ticks_x)
     ax.set_xlabel("Time offset /s", fontsize="12")

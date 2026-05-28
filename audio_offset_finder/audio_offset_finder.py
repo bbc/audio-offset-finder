@@ -88,9 +88,11 @@ def find_offset_between_files(
     Returns
     -------
     A dict containing the following:
-    time_offset (float): the most likely offset of file2 compared to file1, in seconds.  A positive value indicates that
-                         file2 starts after file1
-    frame_offset (int): the offset of file2 compared to file1, measured in MFCC frames
+    time_offset (float): the most likely offset of file2 compared to file1, in seconds, expressed in the
+                         coordinates of the *original* (un-trimmed) input files.  A positive value indicates that
+                         file2 starts after file1.
+    frame_offset (int): the offset of file2 compared to file1, measured in MFCC frames over the trimmed buffers
+    time_offset_shift (float): start1 - start2, the amount added to the trim-relative offset to produce time_offset
     standard_score (float): the standard score of the highest correlation coefficient in the cross-correlation curve
     correlation (numpy int array): the 1D array of correlation coefficients calculated for the two input files
     time_scale: the scalar factor that is multiplied to frame offsets to convert them to time offsets
@@ -112,6 +114,11 @@ def find_offset_between_files(
     offset_dict = find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
     os.remove(tmp1)
     os.remove(tmp2)
+    # Convert the trim-relative time_offset back into original-file coordinates so that the
+    # reported value tells the user where file2 sits within the *original* file1.
+    time_offset_shift = start1 - start2
+    offset_dict["time_offset"] += time_offset_shift
+    offset_dict["time_offset_shift"] = time_offset_shift
     return offset_dict
 
 

@@ -90,7 +90,8 @@ def test_start():
 def test_per_file_trim_and_start():
     import json
 
-    # --start-within shifts only the --within file; the reported offset shifts accordingly.
+    # --start-within narrows the search to a window of the --within file, but the reported
+    # offset is in *original* --within file coordinates.
     args = (
         "--find-offset-of tests/audio/r4_excerpt.ogg --within tests/audio/r4.ogg "
         "--resolution 128 --start-within 320 --trim-within 60 --json"
@@ -99,5 +100,4 @@ def test_per_file_trim_and_start():
         main(args.split())
         output = fakeStdout.getvalue().strip()
         result = json.loads(output)
-        # 334.608 - 320 = 14.608s
-        assert pytest.approx(result["time_offset"]) == 14.608
+        assert pytest.approx(result["time_offset"]) == 334.608
