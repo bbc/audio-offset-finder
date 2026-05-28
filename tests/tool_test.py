@@ -95,6 +95,20 @@ def test_multiple_threshold_json():
             assert p["standard_score"] >= 20.0
 
 
+def test_start():
+    import json
+
+    args = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+        "--trim 25 --start 5 --json"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        result = json.loads(output)
+        assert pytest.approx(result["time_offset"]) == 12.26
+
+
 def test_multiple_threshold_plain():
     args = (
         "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
