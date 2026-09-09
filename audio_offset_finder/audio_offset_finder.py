@@ -16,6 +16,7 @@
 
 from subprocess import Popen, PIPE
 from scipy.io import wavfile
+from scipy.signal import fftconvolve
 import librosa
 import os
 import tempfile
@@ -195,12 +196,10 @@ def cross_correlation(mfcc1, mfcc2, nframes):
     o_max = n1 - nframes + 1
     n = o_max - o_min
     c = np.zeros(n)
-    for k in range(o_min, 0):
-        cc = np.sum(np.multiply(mfcc1[:nframes], mfcc2[-k : nframes - k]), axis=0)
-        c[k] = np.linalg.norm(cc)
-    for k in range(0, o_max):
-        cc = np.sum(np.multiply(mfcc1[k : k + nframes], mfcc2[:nframes]), axis=0)
-        c[k] = np.linalg.norm(cc)
+    ccs_neg = fftconvolve(mfcc2, mfcc1[:nframes][::-1], mode="valid", axes=0)
+    c[o_max:] = np.linalg.norm(ccs_neg[:0:-1], axis=1)
+    ccs_pos = fftconvolve(mfcc1, mfcc2[:nframes][::-1], mode="valid", axes=0)
+    c[:o_max] = np.linalg.norm(ccs_pos, axis=1)
     return c, o_min, o_max
 
 
