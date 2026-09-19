@@ -1,13 +1,27 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Build, Test and Lint
+name: Lint, Build, and Test
 
 on: [push, pull_request]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Black's action needs a modern Python runtime
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - uses: psf/black@stable
+
   build_and_test:
     name: Build/test on ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    needs: lint
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -23,7 +37,7 @@ jobs:
 
     - name: Install FFMPEG (Windows-only)
       if: ${{ matrix.os == 'windows-latest' }}
-      uses: FedericoCarboni/setup-ffmpeg@v3
+      uses: FedericoCarboni/setup-ffmpeg@v3.1
       id: setup-ffmpeg
 
     - name: Install FFMPEG (Non-Windows)
@@ -31,9 +45,6 @@ jobs:
         if [ "$RUNNER_OS" == "macOS" ]; then
           brew install ffmpeg
         elif [ "$RUNNER_OS" == "Linux" ]; then
-          # apt-spy needed because of issues with the default APT repos for Workflow hosts - https://github.com/actions/runner-images/issues/675
-          sudo gem install apt-spy2
-          sudo apt-spy2 fix --commit --launchpad --country=US
           sudo apt-get update
           sudo apt install -y ffmpeg
         fi
@@ -48,10 +59,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pytest
         pip install .
-    - name: Lint with black
-      uses: psf/black@stable
-      with:
-        version: "22.3.0"
     - name: Test with pytest
       run: |
         pytest

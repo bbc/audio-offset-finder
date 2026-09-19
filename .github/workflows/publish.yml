@@ -5,8 +5,22 @@ on:
     types: [created]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Black's action needs a modern Python runtime
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - uses: psf/black@stable
+
   pypi-publish:
     name: Publish release to PyPI
+    needs: lint
     runs-on: ubuntu-latest
     environment:
       name: release
