@@ -71,3 +71,33 @@ def test_json():
         assert len(json_array) == 2
         assert pytest.approx(json_array["time_offset"]) == 12.26
         assert pytest.approx(json_array["standard_score"], rel=1e-2) == 28.99
+
+
+def test_start():
+    import json
+
+    args = (
+        "--find-offset-of tests/audio/timbl_2.mp3 --within tests/audio/timbl_1.mp3 --resolution 160 "
+        "--trim 25 --start 5 --json"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        result = json.loads(output)
+        assert pytest.approx(result["time_offset"]) == 12.26
+
+
+def test_per_file_trim_and_start():
+    import json
+
+    # --start-within narrows the search to a window of the --within file, but the reported
+    # offset is in *original* --within file coordinates.
+    args = (
+        "--find-offset-of tests/audio/r4_excerpt.ogg --within tests/audio/r4.ogg "
+        "--resolution 128 --start-within 320 --trim-within 60 --json"
+    )
+    with patch("sys.stdout", new=StringIO()) as fakeStdout:
+        main(args.split())
+        output = fakeStdout.getvalue().strip()
+        result = json.loads(output)
+        assert pytest.approx(result["time_offset"]) == 334.608
