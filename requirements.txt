@@ -1,5 +1,7 @@
-librosa==0.10.2
-matplotlib==3.7.3
-numpy==1.22.3
-pytest==9.0.3
-scipy==1.10.0
+librosa>=0.10.2
+matplotlib>=3.7.3
+numpy>=1.22.3
+pytest>=8.4.2; python_version < "3.10"
+pytest>=9.0.3; python_version >= "3.10"
+scipy>=1.10.0,!=1.15.*; platform_system == "Darwin" and python_version < "3.11"
+scipy>=1.10.0; platform_system != "Darwin" or python_version >= "3.11"
