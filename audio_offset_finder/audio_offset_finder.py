@@ -145,7 +145,7 @@ def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length
     # and then convert it into a time offset (see also the documentation for the cross_correlation() function)
     max_k_index = np.argmax(c)
     max_k_frame_offset = max_k_index
-    if max_k_frame_offset > latest_frame_offset:
+    if max_k_frame_offset >= latest_frame_offset:
         max_k_frame_offset -= len(c)
     time_scale = hop_length / fs
     time_offset = (max_k_frame_offset) * time_scale

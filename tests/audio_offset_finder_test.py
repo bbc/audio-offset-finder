@@ -19,6 +19,18 @@ from audio_offset_finder.audio_offset_finder import find_offset_between_files, s
 from audio_offset_finder.audio_offset_finder import InsufficientAudioException
 import numpy as np
 import os
+from unittest.mock import patch
+from audio_offset_finder.audio_offset_finder import find_offset_between_buffers
+
+
+def test_find_offset_at_earliest_boundary():
+    rng = np.random.default_rng(0)
+    first = rng.normal(size=(30, 26))
+    second = np.concatenate((rng.normal(size=(10, 26)), first[:10]))
+    with patch("audio_offset_finder.audio_offset_finder.mfcc", side_effect=[[first], [second]]):
+        result = find_offset_between_buffers(np.zeros(1), np.zeros(1), fs=8000, hop_length=128)
+    assert result["frame_offset"] == -10
+    assert result["time_offset"] == pytest.approx(-0.16)
 
 
 def path(test_file):
