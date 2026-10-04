@@ -21,6 +21,59 @@ import numpy as np
 import os
 from unittest.mock import patch
 from audio_offset_finder.audio_offset_finder import find_offset_between_buffers
+from audio_offset_finder import audio_offset_finder as finder
+
+
+@pytest.mark.parametrize("failure_stage", ["conversion", "read", "analysis"])
+def test_failed_analysis_removes_temporary_audio(tmp_path, monkeypatch, failure_stage):
+    created = []
+    error = RuntimeError("audio processing failed")
+
+    def convert(*args):
+        if failure_stage == "conversion" and created:
+            raise error
+        filename = tmp_path / (str(len(created)) + ".wav")
+        filename.write_bytes(b"temporary audio")
+        created.append(filename)
+        return str(filename)
+
+    def read(*args, **kwargs):
+        if failure_stage == "read":
+            raise error
+        return 8000, np.zeros(32)
+
+    def analyze(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(finder, "convert_and_trim", convert)
+    monkeypatch.setattr(finder.wavfile, "read", read)
+    monkeypatch.setattr(finder, "find_offset_between_buffers", analyze)
+
+    with pytest.raises(RuntimeError) as caught:
+        find_offset_between_files("first.mp3", "second.mp3")
+    assert caught.value is error
+    assert created
+    assert all(not filename.exists() for filename in created)
+
+
+def test_failed_conversion_removes_partial_output(tmp_path, monkeypatch):
+    monkeypatch.setattr(finder.tempfile, "tempdir", str(tmp_path))
+
+    class FailedFFmpeg:
+        returncode = 1
+
+        def __init__(self, command, **kwargs):
+            self.output = command[-1]
+
+        def communicate(self):
+            with open(self.output, "wb") as output:
+                output.write(b"partial WAV")
+            return None, "conversion failed"
+
+    monkeypatch.setattr(finder, "Popen", FailedFFmpeg)
+    with pytest.raises(Exception, match="FFMpeg failed:\\nconversion failed"):
+        finder.convert_and_trim("bad.mp3", 8000, None)
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_find_offset_at_earliest_boundary():
