@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from subprocess import Popen, PIPE
+from contextlib import ExitStack
 from scipy.io import wavfile
 from scipy.signal import fftconvolve
 import librosa
@@ -79,14 +80,14 @@ def find_offset_between_files(file1, file2, fs=8000, trim=None, hop_length=128, 
     ------
     InsufficientAudioException if the audio supplied is too short to analyse.
     """
-    tmp1 = convert_and_trim(file1, fs, trim)
-    tmp2 = convert_and_trim(file2, fs, trim)
-    a1 = wavfile.read(tmp1, mmap=True)[1].astype(float)
-    a2 = wavfile.read(tmp2, mmap=True)[1].astype(float)
-    offset_dict = find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
-    os.remove(tmp1)
-    os.remove(tmp2)
-    return offset_dict
+    with ExitStack() as cleanup:
+        tmp1 = convert_and_trim(file1, fs, trim)
+        cleanup.callback(os.remove, tmp1)
+        tmp2 = convert_and_trim(file2, fs, trim)
+        cleanup.callback(os.remove, tmp2)
+        a1 = wavfile.read(tmp1, mmap=True)[1].astype(float)
+        a2 = wavfile.read(tmp2, mmap=True)[1].astype(float)
+        return find_offset_between_buffers(a1, a2, fs, hop_length, win_length, nfft)
 
 
 def find_offset_between_buffers(buffer1, buffer2, fs, hop_length=128, win_length=256, nfft=512, max_frames=2000):
@@ -240,9 +241,16 @@ def convert_and_trim(afile, fs, trim=None):
     ffmpeg_command += ["-acodec", "pcm_s16le"]
     ffmpeg_command += [tmp_name]
 
-    psox = Popen(ffmpeg_command, stderr=PIPE, text=True)
-
-    stdout, stderr = psox.communicate()
-    if psox.returncode != 0:
-        raise Exception("FFMpeg failed:\n" + stderr.strip())
+    try:
+        psox = Popen(ffmpeg_command, stderr=PIPE, text=True)
+        stdout, stderr = psox.communicate()
+        if psox.returncode != 0:
+            raise Exception("FFMpeg failed:\n" + stderr.strip())
+    except Exception:
+        # FFmpeg may have created a partial output before failing.
+        try:
+            os.remove(tmp_name)
+        except FileNotFoundError:
+            pass
+        raise
     return tmp_name
