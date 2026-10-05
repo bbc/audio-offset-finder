@@ -51,6 +51,11 @@ The following command-line options can be provided to alter the behaviour of the
 | --within audio file  |  ...within this file |
 | --sr sample rate |  Target sample rate in Hz during downsampling (default: 8000) |
 | --trim seconds  |  Only use the first n seconds of each audio file |
+| --trim-of seconds  |  Override `--trim` for the `--find-offset-of` file only |
+| --trim-within seconds  |  Override `--trim` for the `--within` file only |
+| --start seconds  |  Skip the first n seconds of each audio file before processing.  Combined with `--trim`, the audio considered is the window `[start, start + trim]`. Default: 0. |
+| --start-of seconds  |  Override `--start` for the `--find-offset-of` file only |
+| --start-within seconds  |  Override `--start` for the `--within` file only |
 | --resolution samples  |  Resolution (maximum accuracy) of search in samples (default: 128) |
 | --show-plot  |  Display a plot of the cross-correlation results |
 | --save-plot filename |  Save a plot of the cross-correlation results to a file (in a format that matches the extension you provide - png, ps, pdf, svg) |
